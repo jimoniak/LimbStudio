@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Mystogen" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option extended_obj_names="1" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Mystogen" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add option="-lsfml-graphics-d" />
+					<Add option="-lsfml-window-d" />
+					<Add option="-lsfml-audio-d" />
+					<Add option="-lsfml-system-d" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Mystogen" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add option="-DSFML_DYNAMIC" />
+			<Add directory="SFML-2.1/include" />
+		</Compiler>
+		<Linker>
+			<Add directory="SFML-2.1/lib" />
+		</Linker>
+		<Unit filename="Sources/Bouton.cpp" />
+		<Unit filename="Sources/Bouton.hpp" />
+		<Unit filename="Sources/Carte.cpp" />
+		<Unit filename="Sources/Carte.hpp" />
+		<Unit filename="Sources/Classes.h" />
+		<Unit filename="Sources/Combat.cpp" />
+		<Unit filename="Sources/Element.cpp" />
+		<Unit filename="Sources/Element.hpp" />
+		<Unit filename="Sources/Ennemi.cpp" />
+		<Unit filename="Sources/GameData.cpp" />
+		<Unit filename="Sources/GameData.hpp" />
+		<Unit filename="Sources/GestionAudio.cpp" />
+		<Unit filename="Sources/GestionAudio.h" />
+		<Unit filename="Sources/Graphique.cpp" />
+		<Unit filename="Sources/Graphique.hpp" />
+		<Unit filename="Sources/Inventaire.cpp" />
+		<Unit filename="Sources/Inventaire.hpp" />
+		<Unit filename="Sources/Jeu.cpp" />
+		<Unit filename="Sources/Messagerie.cpp" />
+		<Unit filename="Sources/Messagerie.hpp" />
+		<Unit filename="Sources/Nuage.cpp" />
+		<Unit filename="Sources/PanneauActif.cpp" />
+		<Unit filename="Sources/PanneauActif.h" />
+		<Unit filename="Sources/Personnage.cpp" />
+		<Unit filename="Sources/Personnage.h" />
+		<Unit filename="Sources/Prototypes.hpp" />
+		<Unit filename="Sources/Randomizer.cpp" />
+		<Unit filename="Sources/Randomizer.hpp" />
+		<Unit filename="Sources/SettingsMenu.cpp" />
+		<Unit filename="Sources/SettingsMenu.hpp" />
+		<Unit filename="Sources/Spherier.hpp" />
+		<Unit filename="Sources/Timer.cpp" />
+		<Unit filename="Sources/accessoire.cpp" />
+		<Unit filename="Sources/accessoire.hpp" />
+		<Unit filename="Sources/constantes.hpp" />
+		<Unit filename="Sources/gameWindow.cpp" />
+		<Unit filename="Sources/gameWindow.hpp" />
+		<Unit filename="Sources/tableauId.cpp" />
+		<Unit filename="main.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

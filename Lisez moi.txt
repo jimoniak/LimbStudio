@@ -1,0 +1,6 @@
+Lisez moi.txt
+
+
+Dossier Data et les Dlls  necessaire au fonctionnement de chaque application, 
+
+a copier dans le dossier racine de chacune d'elle sauf Mystogen.
