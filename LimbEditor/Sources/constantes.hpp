@@ -17,7 +17,7 @@
 
 #define OFFSET_CARTE  0- (COTECARTE * LARGEUR_TILE) / 2
 
-#define VERSION "Version alpha 1.2"
+#define VERSION "Version alpha 0.5"
 
 
 

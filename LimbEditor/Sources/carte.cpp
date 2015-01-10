@@ -93,6 +93,8 @@ Carte::Carte()
 {
     m_nom = "default";
     m_packRessource="Default";
+     m_textureBase=nullptr;
+     m_base=nullptr;
 
 }
 
@@ -128,8 +130,8 @@ Carte::~Carte()
         delete m_ElementHolder[i];
     }
 
-    delete m_textureBase;
-    delete m_base;
+    if(m_textureBase != nullptr) delete m_textureBase;
+    if(m_base !=nullptr)           delete m_base;
     std::cout<<"carte detruite"<<std::endl;
 
 }

@@ -14,6 +14,9 @@ private:
     sf::RenderWindow fenetrePrincipale;
     sf::View view1;
     sf::Font font;
+
+    sf:: Text version;
+
     int m_pageMenu;
     bool m_editeurOuvert;
 
@@ -46,9 +49,9 @@ public:
     void editer();
 
 
-    void creerCarte(std::string nom,std::string taille);
+    bool creerCarte(std::string nom,std::string taille);
 
-    void creerCarte(std::string nom);
+
 
     bool sauvergarderCarte();
     bool chargerCarte(std::string const &nom);

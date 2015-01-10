@@ -43,6 +43,12 @@ Editeur::Editeur() :fenetrePrincipale(sf::VideoMode(LFENETRE, HFENETRE), "LimbEd
     fenetrePrincipale.setVerticalSyncEnabled(true);
     m_horlogeInterne.restart();
 
+     version.setFont(font);
+     version.setCharacterSize(20);
+     version.setColor(sf::Color::White);
+     version.setPosition(10,HFENETRE-25);
+     version.setString("test");
+
 }
 
 
@@ -52,7 +58,7 @@ Editeur::~Editeur()
     if(m_carte!=nullptr)
         delete m_carte;
     if(m_ressourceHolder!=nullptr)
-        delete m_ressourceHolder;
+    delete m_ressourceHolder;
 
 }
 
@@ -213,28 +219,26 @@ void Editeur::menuPrincipal()
     sf::Text creerNom;
     sf::Text textTaille;
 
-    std::string charset = "0123456789";
 
+    std::string charset = "0123456789";
 
 
 
     creerNom.setFont(font);
     creerNom.setCharacterSize(18);                      //texte qui indique la commande à utiliser pour passer
     creerNom.setColor(Color::Blue);
-    creerNom.setPosition(20,HFENETRE -50);
+
     creerNom.setString("Entrer un nom de carte:");
 
 
     textTaille.setFont(font);
     textTaille.setCharacterSize(18);                      //texte qui indique la commande à utiliser pour passer
     textTaille.setColor(Color::Blue);
-    textTaille.setPosition(20,HFENETRE -50);
+
     textTaille.setString("Entrer la taille de la carte: (entre 5 et 15)");
 
     fenetrePrincipale.setKeyRepeatEnabled(false);
 
-
-    fenetrePrincipale.setKeyRepeatEnabled(false);
 
 
     sf::Texture textBoutonV;
@@ -337,6 +341,7 @@ void Editeur::menuPrincipal()
                 else
                 {
                     delete m_carte;
+                    m_carte = nullptr;
                 }
 
             }
@@ -351,7 +356,12 @@ void Editeur::menuPrincipal()
                     m_pageMenu++;
                     Editeur::editer();
                 }
-                else break;
+                else
+                {
+
+                    delete m_carte;
+                    m_carte = nullptr;
+                }
 
             }
 
@@ -383,10 +393,12 @@ void Editeur::menuPrincipal()
             editer.afficher();
             quitter.afficher();
 
+
             break;
         case 1:
             fenetrePrincipale.draw(creerNom);
             fenetrePrincipale.draw(textTaille);
+
             retour.afficher();
             creer.afficher();
             charger.afficher();
@@ -395,15 +407,17 @@ void Editeur::menuPrincipal()
             break;
         case 2:
             quitter.afficher();
+
             break;
         default:
+            quitter.afficher();
             break;
         }
 
         fenetrePrincipale.draw(splash);
 
 
-
+        fenetrePrincipale.draw(version);
         fenetrePrincipale.display();
 
 
@@ -428,7 +442,13 @@ void Editeur::editer()
     sauvegarder.setFenetrelie(fenetrePrincipale);
     sauvegarder.setTitre("Sauver");
     sauvegarder.setTailleTexte(15);
-    sauvegarder.setPosition(sf::Vector2f(LFENETRE - (50 + textBoutonV.getSize().x)  ,HFENETRE  - 100));
+    sauvegarder.setPosition(sf::Vector2f(LFENETRE - (150 + textBoutonV.getSize().x)  ,HFENETRE  - 100));
+
+     lgui::Bouton retour(font,&textBoutonR,&textBoutonV);
+     retour.setFenetrelie(fenetrePrincipale);
+     retour.setTitre("<--");
+     retour.setTailleTexte(15);
+     retour.setPosition(sf::Vector2f(LFENETRE - (50 + textBoutonV.getSize().x)  ,HFENETRE  - 100));
 
 
     for(unsigned int i=0; i<m_interfaceEdition.size(); i++)
@@ -518,6 +538,14 @@ void Editeur::editer()
             sauvergarderCarte();
         }
 
+          if(retour.actionner())
+        {
+            m_pageMenu--;
+             delete m_carte;
+             m_carte=nullptr;
+            return ;
+        }
+
         if(!m_interfaceUtilise )
         {
 
@@ -569,6 +597,7 @@ void Editeur::editer()
 
         }
         sauvegarder.afficher();
+        retour.afficher();
         fenetrePrincipale.draw(infoSouris);
         fenetrePrincipale.display();
         m_interfaceUtilise=false;
@@ -587,13 +616,18 @@ void Editeur::editer()
 }
 
 
-void Editeur::creerCarte(std::string nom,std::string taille)
+bool Editeur::creerCarte(std::string nom,std::string taille)
 {
 
-    int taillecote;
-    if(taille.size()>0) taillecote=utils::ConvStringInt(taille);
-    cout<<taillecote<<endl;
-    if(taillecote<=5 || taillecote>=15)  int taillecote = 10;
+    unsigned  int taillecote;
+    if(taille != "_" && taille != "")
+    {
+         if(taille.size()>0) taillecote=utils::ConvStringInt(taille);
+         cout<<taillecote<<endl;
+
+    }
+
+    if(taillecote<=5 || taillecote>=15)   taillecote = 10;
     m_carte = new Carte(nom,taillecote);
 
     if(m_ressourceHolder!= nullptr) delete m_ressourceHolder;
@@ -615,21 +649,24 @@ bool Editeur::chargerCarte(std::string const &nom)
 
 
     m_carte = new Carte();
-   if( !m_carte->charger(nom))  {
-            Carte* ptr = m_carte;
-            delete ptr;
-            m_carte = nullptr;
-
+   if( !m_carte->charger(nom))
+        {
              return false;
-   }
-
-
-    // cout<< m_carte->getPackRessource()<<endl;
+        }
+   else
+   {
 
     if(m_ressourceHolder!= nullptr) delete m_ressourceHolder;
     m_ressourceHolder= new RessourceHolder(m_carte->getPackRessource());
 
     m_carte->creerElement(*m_ressourceHolder);
+
+
+
+   }
+
+
+    // cout<< m_carte->getPackRessource()<<endl;
 
 
     return true;
