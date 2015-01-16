@@ -14,15 +14,10 @@ depot officiel : https://github.com/jimoniak/LimbEscape
 
 */
 #include <SFML/Graphics.hpp>
-#include "Randomizer.hpp"
-
-
-
 #include <math.h>
 #include <vector>
 #include "constantes.h"
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <ios>
 
@@ -41,16 +36,12 @@ using namespace sf;
 using namespace std;
 
 Jeu::Jeu() :fenetrePrincipale(sf::VideoMode(LFENETRE, HFENETRE), "LimbEscape"),
-    view1(Vector2f(0,HFENETRE / 2),Vector2f(LFENETRE,HFENETRE)),
+    view1(Vector2f(0,350),Vector2f(1536,1156)),
     gestionSouris(&fenetrePrincipale)
 {
-    view1.zoom(1.2);
     if (!font.loadFromFile("Data/Fonts/Timeless.ttf")) {
         std::cout<<"erreur avec Timeless.ttf"<<std::endl;
     }
-
-    if(!textBoutonR.loadFromFile("Data/GUI/boutonf.png")) std::cout<<"Erreur avec texture boutonf.png"<<std::endl;
-    if(!textBoutonV.loadFromFile("Data/GUI/boutond.png")) std::cout<<"Erreur avec texture boutond.png"<<std::endl;
 
      infoSouris.setFont(font);
      infoSouris.setString("Souris en position : X:  , Y:  "); //text info coordonnées souris
@@ -67,12 +58,8 @@ Jeu::Jeu() :fenetrePrincipale(sf::VideoMode(LFENETRE, HFENETRE), "LimbEscape"),
       m_pageMenu=0;
       m_ressourceHolder = nullptr;
       m_carte = nullptr;
-      m_joueur = nullptr;
 
        fenetrePrincipale.setVerticalSyncEnabled(true);
-       rechercheFichier();
-
-       m_ptrthis = this;
 
 }
 
@@ -80,7 +67,7 @@ Jeu::~Jeu()
 {
     if(m_carte!=nullptr) delete m_carte;
     if(m_ressourceHolder!=nullptr) delete m_ressourceHolder;
-    if(m_joueur!= nullptr)  delete m_joueur;
+    if(m_joueur) delete m_joueur;
 
 }
 
@@ -91,15 +78,13 @@ bool Jeu::objectifRempli()
     m_objectifRestant = m_repereObjectif.size();
     Objectif * cast;
     for(unsigned i=0; i< m_repereObjectif.size(); i++) {
-        cast = dynamic_cast<Objectif*>(m_carte->getElementHolder()[m_repereObjectif[i]]);
+        cast = dynamic_cast<Objectif*>(Element::tableauElement[m_repereObjectif[i]]);
         cast->testEtat();
 
 
         if(cast->estResolu()) {
             m_objectifRestant --;
         }
-
-        std::cout<<m_objectifRestant <<"\b" ;
 
     }
     if(m_objectifRestant == 0) {
@@ -110,6 +95,13 @@ bool Jeu::objectifRempli()
 
 int Jeu::gagner()
 {
+    fenetrePrincipale.clear();
+
+    if(debug)cout<<"Gagné!"<<endl;
+
+    if(debug)std::cout<<"fin!"<< endl;
+    fenetrePrincipale.close();
+
     return EXIT_SUCCESS;
 
 }
@@ -118,45 +110,29 @@ void Jeu::menuPrincipal()
 {
     fenetrePrincipale.setKeyRepeatEnabled(false);
 
+    sf::Texture textBoutonV;
+    sf::Texture textBoutonR;
+    if(!textBoutonR.loadFromFile("Data/GUI/boutonf.png")) std::cout<<"Erreur avec texture boutonf.png"<<std::endl;
+    if(!textBoutonV.loadFromFile("Data/GUI/boutond.png")) std::cout<<"Erreur avec texture boutond.png"<<std::endl;
+
     lgui::Bouton jouer(font,&textBoutonR,&textBoutonV);  lgui::Bouton quitter(font,&textBoutonR,&textBoutonV);
     jouer.setTitre("Jouer");                                               quitter.setTitre("Quitter");
     jouer.setTailleTexte(15);                                             quitter.setTailleTexte(15);
-
-
-
-     lgui::Bouton retour(font,&textBoutonR,&textBoutonV);
-     retour.setTitre("Retour");
-     retour.setTailleTexte(15);
-
-    lgui::Bouton esbrouffe(font,&textBoutonR,&textBoutonV);
-     esbrouffe.setTitre("Esbrouffe");
-     esbrouffe.setTailleTexte(15);
-
 
      lgui::Bouton charger(font,&textBoutonR,&textBoutonV);
      charger.setTitre("Charger");
      charger.setTailleTexte(15);
 
-      lgui::Bouton aleatoire(font,&textBoutonR,&textBoutonV);
-     aleatoire.setTitre("Aleatoire");
-     aleatoire.setTailleTexte(15);
-
-    lgui::ZoneSaisie saisieNom( font, sf::Vector2f(250,30), sf::Vector2f( LFENETRE/2-125, HFENETRE/2 ), sf::Color::Green ,sf::Color::Blue);
+    lgui::ZoneSaisie saisieNom( font, sf::Vector2f(250,30), sf::Vector2f( LFENETRE/2-125, HFENETRE/2 - 50), sf::Color::Green ,sf::Color::Blue);
 
     jouer.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x ,HFENETRE /2 - 100));
-    esbrouffe.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x ,HFENETRE /2 ));
     quitter.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x ,HFENETRE /2+100));
     charger.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x /2  ,HFENETRE /2+100));
-    aleatoire.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x /2  ,HFENETRE /2-100));
-    retour.setPosition(sf::Vector2f(LFENETRE  - textBoutonV.getSize().x  - 30  ,HFENETRE -100));
 
     jouer.setFenetrelie(fenetrePrincipale);
-    esbrouffe.setFenetrelie(fenetrePrincipale);
     charger.setFenetrelie(fenetrePrincipale);
-    aleatoire.setFenetrelie(fenetrePrincipale);
     quitter.setFenetrelie(fenetrePrincipale);
     saisieNom.setFenetrelie(fenetrePrincipale);
-    retour.setFenetrelie(fenetrePrincipale);
     sf::Event event;
 
 
@@ -166,7 +142,7 @@ void Jeu::menuPrincipal()
             if (event.type == sf::Event::Closed)
                 fenetrePrincipale.close();
 
-                 if(m_pageMenu==2)
+                 if(m_pageMenu==1)
             {
                 saisieNom.actif(event);
             }
@@ -181,46 +157,15 @@ void Jeu::menuPrincipal()
 
         }
         if(quitter.actionner()) {
-                return;
 
         }
         break;
-        case 1:
-        if(esbrouffe.actionner()) {
-            m_pageMenu++;
-
-        }
-        if(retour.actionner()) {
-        m_pageMenu--;
-        }
-        break;
-            case 2:
-            if(aleatoire.actionner())
-            {
-
-                int randnb;
-                string carte;
-                randnb= Randomizer::Random( 0, m_tabCartes.size()-1); //-1 est une sécurité pour pas sortir du tableau
-                carte=  m_tabCartes[randnb];
-                carte.resize(carte.size() - 4);// -4 pour retirer le ".map"
-                chargerCarte(carte);
-
-                Jeu::jouer();
-
-
-            }
-            if(charger.actionner())
-            {
-
+            case 1:
+            if(charger.actionner()) {
             std::string nom;
             nom =  saisieNom.getTexte() ;
-            if(chargerCarte(nom))
+            chargerCarte(nom);
             Jeu::jouer();
-
-            }
-             if(retour.actionner())
-            {
-            m_pageMenu--;
             }
 
             break;
@@ -234,17 +179,10 @@ void Jeu::menuPrincipal()
         jouer.afficher();//
         quitter.afficher();//
         }
-        if(m_pageMenu==1)
+        else if(m_pageMenu == 1)
         {
-        esbrouffe.afficher();//
-        retour.afficher();
-        }
-        else if(m_pageMenu == 2)
-        {
-            aleatoire.afficher();
             charger.afficher();
             saisieNom.afficher();
-            retour.afficher();
 
         }
         fenetrePrincipale.display();
@@ -256,114 +194,60 @@ void Jeu::menuPrincipal()
 
 void Jeu::jouer()
 {
-    //Création de l'interface bouton
-     reglerVue();
-     lgui::Bouton recharger(font,&textBoutonR,&textBoutonV);
-     recharger.setTitre("Recharger");
-     recharger.setTailleTexte(15);
-     recharger.setFenetrelie(fenetrePrincipale);
-     recharger.setPosition(sf::Vector2f(LFENETRE - (textBoutonV.getSize().x + 15),HFENETRE - (textBoutonV.getSize().y + 30)));
 
-      lgui::Bouton retour(font,&textBoutonR,&textBoutonV);
-     retour.setTitre("Retour");
-     retour.setTailleTexte(15);
-     retour.setFenetrelie(fenetrePrincipale);
-     retour.setPosition(sf::Vector2f(LFENETRE - (textBoutonV.getSize().x + 15),HFENETRE - (textBoutonV.getSize().y + 100)));
-
-
-      std::string infSouris;
-
-    //horloge pour limiter les evenements produit par seconde
     sf::Clock horlogeEvent;
     sf::Time tempsBoucleEvent;
-
-    if(m_joueur != nullptr ) delete m_joueur; //joueur...
     m_joueur = new Joueur(fenetrePrincipale,m_carte);
-
+    std::string infSouris;
 
     while (fenetrePrincipale.isOpen()) {
         sf::Event event;
-
-        //Gestion des evenements et saisies utilisateur...
-        while (fenetrePrincipale.pollEvent(event))
-            {
+        while (fenetrePrincipale.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 fenetrePrincipale.close();
-            }
+        }
 
-         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) view1.move(-150 * m_horlogeInterne.getElapsedTime().asSeconds(),0); // deplacement de la camera
-         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) view1.move(150 * m_horlogeInterne.getElapsedTime().asSeconds(),0);
-         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) view1.move(0,-150 * m_horlogeInterne.getElapsedTime().asSeconds());
-         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) view1.move(0,150 * m_horlogeInterne.getElapsedTime().asSeconds());
-         m_horlogeInterne.restart();
+         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) view1.move(-1,0); // deplacement de la camera
+         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) view1.move(1,0);
+         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) view1.move(0,-1);
+         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) view1.move(0,1);
 
-        if( objectifRempli() && !m_joueur->enDeplacement()){ return; /*gagner();*/}
-
-        if(horlogeEvent.getElapsedTime().asMilliseconds() - tempsBoucleEvent.asMilliseconds()>10) {
-           m_joueur->gererClavier(*m_ptrthis);
+        if(horlogeEvent.getElapsedTime().asMilliseconds() - tempsBoucleEvent.asMilliseconds()>30) {
+           m_joueur->gererClavier();
             tempsBoucleEvent = horlogeEvent.getElapsedTime();
         }
 
-        if(recharger.actionner())
-        {
-
-        }
-        if(retour.actionner())
-        {
-            return;
-        }
-
-        //Actualise l'animation du personnage
        m_joueur->animer();
 
-        //Placement dans la vue prevue pour le jeu
         fenetrePrincipale.setView(view1);
-        //Calcul des coordonées souris
         gestionSouris.CalcCoordCarte();
-       /* infSouris = "Souris en position : X:" + utils::ConvertionFltString(gestionSouris.getCoordSouris().x )+  "Y:" +utils::ConvertionFltString(gestionSouris.getCoordSouris().y);
+        infSouris = "Souris en position : X:" + utils::ConvertionFltString(gestionSouris.getCoordSouris().x )+  "Y:" +utils::ConvertionFltString(gestionSouris.getCoordSouris().y);
         infoSouris.setString(infSouris);
-        selecteur.positionnerSelecteur(gestionSouris);*/
+        selecteur.positionnerSelecteur(gestionSouris);
 
+        fenetrePrincipale.clear();
 
-        fenetrePrincipale.clear(); //nettoyage de la fenetre
-
-
-     //   if(gestionSouris.getCoordSouris().x<m_carte->getTaille() && gestionSouris.getCoordSouris().x>=0 && gestionSouris.getCoordSouris().y>=0 && gestionSouris.getCoordSouris().y< m_carte->getTaille()) {
-     //     fenetrePrincipale.draw(selecteur.getSprite());
-    //}
-
+        if(gestionSouris.getCoordSouris().x<m_carte->getTaille() && gestionSouris.getCoordSouris().x>=0 && gestionSouris.getCoordSouris().y>=0 && gestionSouris.getCoordSouris().y< m_carte->getTaille()) {
+            fenetrePrincipale.draw(selecteur.getSprite());
+        }
         fenetrePrincipale.draw(m_carte->getSprCarte());
 
-        for(unsigned int i = 0 ; i< m_repereObjectif.size();i++) //Dessin des objectifs
+        for(unsigned int i= 0 ; i< m_carte->getElementHolder().size(); i++)
         {
-            fenetrePrincipale.draw(m_carte->getElementHolder()[m_repereObjectif[i]]->getApparence());
-        }
-
-        for(unsigned int y= 0 ; y<m_tabElement.size();y++) //dessin du reste.
-        {
-
-            for(unsigned int x =0 ; x< m_tabElement[y].size();x++ )
+            if(m_carte->getElementHolder()[i]->getType() != DEPART)
             {
-                if(m_tabElement[y][x] !=nullptr)
-                {
-                    if(m_tabElement[y][x]->getType() != DEPART)
-                    fenetrePrincipale.draw(m_tabElement[y][x]->getApparence());
-                }
+            fenetrePrincipale.draw(m_carte->getSprElem(i));
             }
-
         }
 
         m_joueur->afficher(fenetrePrincipale);
 
 
         fenetrePrincipale.setView(fenetrePrincipale.getDefaultView());//Changement de vue pour dessiner l'interface.
-        recharger.afficher();
-        retour.afficher();
-       // fenetrePrincipale.draw(infoSouris);
+        fenetrePrincipale.draw(infoSouris);
         fenetrePrincipale.draw(infoVersion);
+
         fenetrePrincipale.display();
-
-
     }
 
 }
@@ -372,80 +256,31 @@ void Jeu::jouer()
 bool Jeu::chargerCarte(std::string const &nom)
 {
 
-    if(m_carte != nullptr) delete m_carte; //Si une carte existe dejà , on la supprime
-    m_carte = new Carte(); //On en crée une vierge
-   if( !m_carte->charger(nom)) //On charge la carte à partir du fichier
+
+    m_carte = new Carte();
+   if( !m_carte->charger(nom))
         {
-             return false; // si on echoue
+             return false;
         }
-   else // Si la carte à correctement chargé
+   else
    {
 
-    if(m_ressourceHolder != nullptr) delete m_ressourceHolder; // On supprime le ressourceholder si il existe deja
-    m_ressourceHolder= new RessourceHolder(m_carte->getPackRessource()); // On en crée un nouveau avec le pack de ressource de la carte.
+    if(m_ressourceHolder != nullptr) delete m_ressourceHolder;
+    m_ressourceHolder= new RessourceHolder(m_carte->getPackRessource());
 
-    for(unsigned int i = 0 ; i<Element::tableauElement.size() ; i++) // On reset tout les elements deja existant .
-    {
-        delete Element::tableauElement[i];
-
-    }
-
-
-    Element::tableauElement.clear(); // on désalloue tout le vector
-    m_carte->creerElement(*m_ressourceHolder); // et on le refait pour la carte actuelle.
-    trierElement(); // Enfin on tri les elements  dans un vector de jeu:: en enlevant le Depart et les objectif (pour l'affichage)
+    m_carte->creerElement(*m_ressourceHolder);
 
     return true;
+
+
 
    }
 
 }
-
-void Jeu::trierElement()
-{
-
-    if(m_tabElement.size()>0)
-    {
-
-        m_tabElement.clear();
-    }
-
-    for(unsigned int i = 0; i< TAILLE_MAX;i++)
-    {
-        m_tabElement.push_back(std::vector<Element*>(TAILLE_MAX));//Creation d'un vector double dimensionnel de taille TAILLE_MAX ( 15)
-
-    }
-
-    InitNombreObjectif();
-
-    for(unsigned int i = 0 ; i< m_carte->getElementHolder().size();i++) //copie des pointeurs sur les element dans le tableau ,
-    {
-        if(m_carte->getElementHolder()[i]->getType() != OBJECTIF && m_carte->getElementHolder()[i]->getType() != DEPART) //a l'exception des OBJECTIF
-        m_tabElement[m_carte->getElementHolder()[i]->getPosition().y][m_carte->getElementHolder()[i]->getPosition().x] = m_carte->getElementHolder()[i] ;
-
-    }
-
-
-}
-
-void Jeu::deplacerElement(sf::Vector2f positionActuelle,sf::Vector2f positionNouvelle)
-{
-    Element* ptr;
-
-    ptr= m_tabElement[positionActuelle.y][positionActuelle.x];
-    m_tabElement[positionActuelle.y][positionActuelle.x] =nullptr;
-    m_tabElement[positionNouvelle.y][positionNouvelle.x] = ptr;
-
-}
-
-std::vector<std::vector<Element*>> Jeu::getTabElement()
-{
-    return m_tabElement;
-
-}
-
 void Jeu::intro()
 {
+
+
     sf::Text TextPasse;
 
     TextPasse.setFont(font);
@@ -454,6 +289,7 @@ void Jeu::intro()
     TextPasse.setPosition(20,HFENETRE -50);
     TextPasse.setString("Appuyer sur E pour passer...");
     sf::Event event;
+
 
     sf::Texture textureLimb;               //Logo Limb'Studio
     sf::Texture textureSfml;
@@ -554,12 +390,6 @@ bool Jeu::demarrer()
     return EXIT_SUCCESS;
 }
 
-void Jeu::reglerVue()
-{
-
-    view1.setCenter(0, m_carte->getSprCarte().getTexture()->getSize().y / 2);
-}
-
 void Jeu::AfficherScene()
 {}
 void  Jeu::AfficherHud()
@@ -567,44 +397,13 @@ void  Jeu::AfficherHud()
 
 void Jeu::InitNombreObjectif()
 {
-   m_repereObjectif.clear();
 
-    if(m_repereObjectif.size()==0)
-        { // protection
-            for(unsigned int i=0 ; i< m_carte->getElementHolder().size(); i++) { //on parcourt le tableau d'element
+    if(m_repereObjectif.size()==0) { // protection
+        for(unsigned int i=0 ; i< m_carte->getElementHolder().size(); i++) { //on parcourt le tableau d'element
             if( m_carte->getElementHolder()[i]->getType() == OBJECTIF) { // Si on tombe sur un objectif
                 m_repereObjectif.push_back(i); // On enregistre sa position dans le tableau d'element dans un autre tableau.
 
             }
         }
     }
-}
-
-
-void Jeu::rechercheFichier()
-{
-
-    string cheminCarte = ".\\Cartes";
-
-    system("dir Cartes\\*.map* /b > liste.txt");
-
-     std::ifstream fichier("liste.txt");
-     std::string s;
-     unsigned int i = 0;
-
-    if(fichier){
-        while(std::getline(fichier,s))
-            {
-
-                m_tabCartes.push_back(s);
-               //std::cout<<m_tabCartes[i]<<std::endl;
-               i++;
-            }
-    }
-    else
-    {
-        std::cout << "Ne peut ouvrir " << std::endl;
-    }
-    fichier.close();
-
 }

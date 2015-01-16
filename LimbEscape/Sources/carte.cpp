@@ -102,8 +102,6 @@ Carte::Carte()
      m_textureBase=nullptr;
      m_base=nullptr;
 
-      if (!m_popbuffer.loadFromFile("Data/Sounds/Clicks/pop.wav"))   cerr<<"Impossible de charger click.wav"<<endl;
-      m_pop.setBuffer(m_popbuffer);
 
 }
 
@@ -113,8 +111,6 @@ Carte::Carte(std::string nom,int taille)
     m_nom = nom;
     m_tailleCote = taille;
 
-     if (!m_popbuffer.loadFromFile("Data/Sounds/Clicks/pop.wav"))   cerr<<"Impossible de charger click.wav"<<endl;
-     m_pop.setBuffer(m_popbuffer);
 
 
     for(unsigned int i = 0; i<m_tailleCote *m_tailleCote; i++)
@@ -126,6 +122,7 @@ Carte::Carte(std::string nom,int taille)
 
 
     m_packRessource = "Default";
+    m_ElementHolder.clear();
 
     creationBase();
 
@@ -140,11 +137,18 @@ Carte::~Carte()
 {
     for(unsigned int i; i< m_ElementHolder.size(); i++)
     {
-        delete m_ElementHolder[i];
+        cout<<m_ElementHolder.size()<<endl;
+        delete m_ElementHolder[i];m_ElementHolder[i] = nullptr;
     }
+
+
+    m_ElementHolder.clear();
+    rholder =nullptr;
 
     if(m_textureBase != nullptr) delete m_textureBase;
     if(m_base !=nullptr)           delete m_base;
+
+    m_tabElement.clear();
     std::cout<<"carte detruite"<<std::endl;
 
 }
@@ -167,8 +171,8 @@ bool Carte::charger(std::string const &nom)
     else
     {
         std::string chemin = "Cartes/" + nom  + ".map";
-
         ifstream chargement(chemin.c_str(), ios ::binary);
+
         if(!chargement)
         {
             cerr<<"Erreur, Impossible de charger "<<nom<<"!"<<endl;
@@ -177,42 +181,28 @@ bool Carte::charger(std::string const &nom)
         else
         {
 
-             int taillestring;
+            int taillestring;
             int taille2;
-
             chargement.read ((char*)&m_tailleCote, sizeof (m_tailleCote));
-
             chargement.read((char*)&taillestring,sizeof(int));
-            cout<<"tailleString: "<< taillestring<<endl;
-            taillestring;
             m_nom.resize(taillestring);
             chargement.read ((char*)m_nom.c_str(), taillestring);
 
-
             chargement.read((char*)&taille2,sizeof(int));
-            cout<<"tailleString: "<< taille2<<endl;
-
             m_packRessource.resize(taille2);
             chargement.read ((char*)m_packRessource.c_str(),taille2);
-
             for(unsigned int i = 0; i<m_tailleCote *m_tailleCote; i++)
-
             {
-
                 m_tabElement.push_back(RIEN);
             }
-
-
             for(unsigned int i =0 ; i< m_tabElement.size(); i++)
             {
                 chargement.read((char*)&m_tabElement[i], sizeof (Type_element));
-
-
             }
-
             cout<<"nom de la carte: " <<m_nom<<endl;
             cout<<"nom du pack de ressource: "<<m_packRessource<<endl;
             chargement.close();
+          //  return true;
 
         }
     }

@@ -21,6 +21,8 @@ depot officiel : https://github.com/jimoniak/LimbEscape
 #include "constantes.h"
 #include "carte.hpp"
 #include "element.hpp"
+
+#include "jeu.hpp"
 #include "joueur.hpp"
 
 
@@ -30,22 +32,19 @@ depot officiel : https://github.com/jimoniak/LimbEscape
 Joueur::Joueur(sf::RenderWindow &fenetre,Carte* carte)
 {
 
-
     m_fenetre = &fenetre;
     m_carte = carte;
     m_coteCarte = m_carte->getTaille();
+    m_position = sf::Vector2f(0,0);
 
     m_direction = 0;
     m_enDeplacement = false;
-
-
-
 
     chargementTexture();
     // std::cout<<m_tailleTexture.x<<std::endl;
 
     bool departcharge =false;
-    for(unsigned int i =0;i<m_carte->getElementHolder().size();i++)
+    for(unsigned int i =0; i<m_carte->getElementHolder().size(); i++)
     {
         if(m_carte->getElementHolder()[i]->getType() == DEPART)
         {
@@ -57,7 +56,7 @@ Joueur::Joueur(sf::RenderWindow &fenetre,Carte* carte)
     if(!departcharge)
     {
         std::cerr<<"erreur,chargement du joueur"<<std::endl;
-       return;
+        return;
 
     }
 
@@ -66,9 +65,16 @@ Joueur::Joueur(sf::RenderWindow &fenetre,Carte* carte)
 
 }
 
+Joueur::~Joueur()
+{
+
+
+}
+
 bool Joueur::chargementTexture()
 {
-    if(!m_apparence.loadFromFile("Data/Player/GabaritPersonnage.png")) {
+    if(!m_apparence.loadFromFile("Data/Player/GabaritPersonnage.png"))
+    {
         std::cout<<"erreur lors de l'ouverture de la texture pour personnage"<<std::endl;
     }
     m_tailleTexture = m_apparence.getSize();
@@ -80,22 +86,26 @@ bool Joueur::chargementTexture()
 
 }
 
-void Joueur::gererClavier()
+void Joueur::gererClavier(Jeu &jeu)
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) deplacer(1); //HAUT
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) deplacer(2);//DROITE
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) deplacer(3);//BAS
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) deplacer(4);//GAUCHE
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) deplacer(1,jeu); //HAUT
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) deplacer(2,jeu);//DROITE
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) deplacer(3,jeu);//BAS
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) deplacer(4,jeu);//GAUCHE
 
 }
 
 
-void Joueur::pousserElement(Element &element)
+void Joueur::pousserElement(Element &element,Jeu &jeu)
 {
-    if(m_direction==1)  element.Deplacer(sf::Vector2f(0,-1));
-    if(m_direction==2)  element.Deplacer(sf::Vector2f(1,0));
-    if(m_direction==3)  element.Deplacer(sf::Vector2f(0,1));
-    if(m_direction==4)  element.Deplacer(sf::Vector2f(-1,0));
+    sf::Vector2f deplacement;
+    if(m_direction==1)  deplacement = sf::Vector2f(0,-1);
+    if(m_direction==2)  deplacement = sf::Vector2f(1,0);
+    if(m_direction==3)  deplacement = sf::Vector2f(0,1);
+    if(m_direction==4)  deplacement = sf::Vector2f(-1,0);
+
+    jeu.deplacerElement(element.getPosition(),element.getPosition()+deplacement);
+    element.Deplacer(deplacement);
 
     // std::cout<< element.getPosition().x <<std::endl;
 
@@ -109,419 +119,138 @@ bool  Joueur::enDeplacement()
 
 
 
-void Joueur::deplacer(int direction)
+void Joueur::deplacer(int direction,Jeu &jeu)
 {
 
     bool sortieCarte = true;
-    if(!m_enDeplacement) {
-
-        m_direction = direction;
-        m_positionDepartAnimation= m_sprite.getPosition();
-        unsigned int i;
-        unsigned int j=0;
-        bool obstacle = false;
-        i=0;
-
-
-        if(direction == 1 && m_position.y >0) { // si on va vers le haut, et que la case où l'on va n'est pas hors de la carte
-            for(unsigned int cmpt=0; cmpt< Element::tableauElement.size(); cmpt++) { //on verifie la presence d'element sur la prochaine position du joueur
-                if(Element::tableauElement[cmpt]->getPosition().y == (m_position.y -1) && m_position.x == Element::tableauElement[cmpt]->getPosition().x) { //si un element est present,
-                    i=cmpt; //on enregistre sa position dans le tableau
-                    break; //et on sort de la boucle
-                }
-
-            }
-            if(!(Element::tableauElement[i]->getPosition().y == (m_position.y - 1)) || !(m_position.x == Element::tableauElement[i]->getPosition().x) ) { //si un element n'est pas present...
-                m_position.y-=1;  //on deplace le joueur
-                m_deplacement.x = VECTEUR_DEPLACEMENT_X ;
-                m_deplacement.y= (-1) * VECTEUR_DEPLACEMENT_Y ;
-                sortieCarte=false;
-
-            }
-
-            else  if(Element::tableauElement[i]->estPoussable()) { //Si presence d'un element, est qu'il est poussable...
-                if((m_position.y - 2) >= 0 ) { // si la position futur de l'element n'est pas hors de la carte...
-
-
-                    for(j=0; j<Element::tableauElement.size(); j++) { // on verifie la presence d'un autre element sur le trajet de l'element poussé
-                        if(j != i ) {
-                            if(Element::tableauElement[i]->getPosition().x == Element::tableauElement[j]->getPosition().x  && ( Element::tableauElement[i]->getPosition().y - 1) == Element::tableauElement[j]->getPosition().y ) {
-                                obstacle=true;
-                                if(Element::tableauElement[j]->estFranchissable()) {
-                                    if(Element::tableauElement[j]->getType() == OBJECTIF) {
-                                        Objectif* cast;
-                                        cast = dynamic_cast<Objectif*>(Element::tableauElement[j]);
-                                        cast->testEtat();
-
-                                        if(cast->estResolu()) {
-                                            obstacle = true;
-                                        } else obstacle = false;
-
-                                    } else   obstacle = false;
-
-                                }
-                            }
-                        }
-
-                    }
-                    if(!obstacle) {
-                        m_position.y-=1;
-                        m_deplacement.x = VECTEUR_DEPLACEMENT_X ;
-                        m_deplacement.y= (-1) * VECTEUR_DEPLACEMENT_Y ;
-                        sortieCarte=false;
-                        pousserElement(*Element::tableauElement[i]);
-
-                    }
-                }
-            } else  if(Element::tableauElement[i]->estFranchissable()) { // si un element est present et franchissable...
-
-                bool presence = false;
-                for(unsigned int j=0;j<Element::tableauElement.size();j++)
-                {
-                    if(j!= i )
-                    {
-                            if(Element::tableauElement[j]->getPosition() == Element::tableauElement[i]->getPosition())
-                            {
-
-                                    presence = true;
-
-                            }
-                    }
-
-
-
-                }
-                if(!presence){
-                m_position.y-=1;  //on deplace le joueur
-                m_deplacement.x = VECTEUR_DEPLACEMENT_X ;
-                m_deplacement.y= (-1) * VECTEUR_DEPLACEMENT_Y ;
-                sortieCarte=false;
-                }
-
-
-            }
-        } else if(direction ==2 && m_position.x<m_coteCarte-1) {
-
-            for(unsigned int cmpt=0; cmpt< Element::tableauElement.size(); cmpt++) {
-
-                if(Element::tableauElement[cmpt]->getPosition().x == (m_position.x +1) && m_position.y == Element::tableauElement[cmpt]->getPosition().y) {
-                    i=cmpt;
-                    break;
-                }
-
-            }
-
-            //cout<< Element::tableauElement[i]->getPosition().x <<endl;
-
-            if(!(Element::tableauElement[i]->getPosition().x == (m_position.x + 1)) || !(m_position.y == Element::tableauElement[i]->getPosition().y) ) {
-                m_position.x+=1;
-                m_deplacement.x = VECTEUR_DEPLACEMENT_X ;
-                m_deplacement.y=  VECTEUR_DEPLACEMENT_Y;
-                sortieCarte=false;
-            }
-
-            else  if(Element::tableauElement[i]->estPoussable()) {
-                if((m_position.x + 2) < m_coteCarte ) {
-
-
-
-                    for(j=0; j<Element::tableauElement.size(); j++) {
-                        if(j != i ) {
-
-
-                            if((Element::tableauElement[i]->getPosition().x + 1) == Element::tableauElement[j]->getPosition().x  &&  Element::tableauElement[i]->getPosition().y  == Element::tableauElement[j]->getPosition().y ) {
-                                obstacle=true;
-                                if(Element::tableauElement[j]->estFranchissable()) {
-                                    if(Element::tableauElement[j]->getType() == OBJECTIF) {
-                                        Objectif* cast;
-                                        cast = dynamic_cast<Objectif*>(Element::tableauElement[j]);
-                                        cast->testEtat();
-
-                                        if(cast->estResolu()) {
-                                            obstacle = true;
-                                        } else obstacle = false;
-
-                                    } else   obstacle = false;
-
-                                }
-                            }
-                        }
-
-                    }
-                    if(!obstacle) {
-
-                        m_position.x+=1;
-                        m_deplacement.x = VECTEUR_DEPLACEMENT_X ;
-                        m_deplacement.y=  VECTEUR_DEPLACEMENT_Y ;
-                        sortieCarte=false;
-                        pousserElement(*Element::tableauElement[i]);
-
-                    }
-
-                }
-            } else  if(Element::tableauElement[i]->estFranchissable()) {
-
-                  bool presence = false;
-                for(unsigned int j=0;j<Element::tableauElement.size();j++)
-                {
-                    if(j!= i )
-                    {
-                            if(Element::tableauElement[j]->getPosition() == Element::tableauElement[i]->getPosition())
-                            {
-
-                                    presence = true;
-
-                            }
-                    }
-
-
-
-                }
-                if(!presence)
-                {
-
-
-                m_position.x+=1;
-                m_deplacement.x = VECTEUR_DEPLACEMENT_X ;
-                m_deplacement.y=  VECTEUR_DEPLACEMENT_Y;
-                sortieCarte=false;
-                }
-            }
-
-
-        } else if(direction ==3 && m_position.y <m_coteCarte-1) {
-            for(unsigned int cmpt=0; cmpt< Element::tableauElement.size(); cmpt++) {
-
-                if(Element::tableauElement[cmpt]->getPosition().y == (m_position.y +1) && m_position.x == Element::tableauElement[cmpt]->getPosition().x) {
-                    i=cmpt;
-                    break;
-                }
-
-            }
-
-            if(!(Element::tableauElement[i]->getPosition().y == (m_position.y + 1)) || !(m_position.x== Element::tableauElement[i]->getPosition().x) ) {
-                m_position.y+=1;
-                m_deplacement.x = (-1) * VECTEUR_DEPLACEMENT_X ;
-                m_deplacement.y=  VECTEUR_DEPLACEMENT_Y ;
-                sortieCarte=false;
-                //  i=Element::tableauElement.size();
-
-            }
-
-            else  if(Element::tableauElement[i]->estPoussable()) {
-                if((m_position.y + 2) < m_coteCarte ) {
-
-
-                    for(j=0; j<Element::tableauElement.size(); j++) {
-                        if(j != i ) {
-                            if(Element::tableauElement[i]->getPosition().x  == Element::tableauElement[j]->getPosition().x  &&  (Element::tableauElement[i]->getPosition().y  + 1 )== Element::tableauElement[j] -> getPosition().y ) {
-                                obstacle=true;
-                                if(Element::tableauElement[j]->estFranchissable()) {
-                                    if(Element::tableauElement[j]->getType() == OBJECTIF) {
-                                        Objectif* cast;
-                                        cast = dynamic_cast<Objectif*>(Element::tableauElement[j]);
-                                        cast->testEtat();
-
-                                        if(cast->estResolu()) {
-                                            obstacle = true;
-                                        } else obstacle = false;
-
-                                    } else   obstacle = false;
-
-                                }
-
-                            }
-                        }
-
-                    }
-                    if(!obstacle) {
-
-                        m_position.y+=1;
-                        m_deplacement.x = (-1) * VECTEUR_DEPLACEMENT_X ;
-                        m_deplacement.y=  VECTEUR_DEPLACEMENT_Y ;
-                        sortieCarte=false;
-                        pousserElement(*Element::tableauElement[i]);
-
-                    }
-                }
-            } else  if(Element::tableauElement[i]->estFranchissable()) {
-
-                 bool presence = false;
-                for(unsigned int j=0;j<Element::tableauElement.size();j++)
-                {
-                    if(j!= i )
-                    {
-                            if(Element::tableauElement[j]->getPosition() == Element::tableauElement[i]->getPosition())
-                            {
-
-                                    presence = true;
-
-                            }
-                    }
-
-
-
-                }
-                if(!presence)
-                {
-                m_position.y+=1;
-                m_deplacement.x = (-1) * VECTEUR_DEPLACEMENT_X ;
-                m_deplacement.y=  VECTEUR_DEPLACEMENT_Y ;
-                sortieCarte=false;
-                }
-            }
-        } else if(direction ==4 && m_position.x>0) {
-            for(unsigned int cmpt=0; cmpt< Element::tableauElement.size(); cmpt++) {
-
-                if(Element::tableauElement[cmpt]->getPosition().x == (m_position.x -1) && m_position.y == Element::tableauElement[cmpt]->getPosition().y) {
-                    i=cmpt;
-                    break;
-                }
-
-            }
-
-            if(!(Element::tableauElement[i]->getPosition().x == (m_position.x - 1)) || !(m_position.y == Element::tableauElement[i]->getPosition().y) ) {
-
-
-                m_position.x-=1;
-                m_deplacement.x = (-1) * VECTEUR_DEPLACEMENT_X ;
-                m_deplacement.y= (-1) *  VECTEUR_DEPLACEMENT_Y ;
-                sortieCarte=false;
-                //  i=Element::tableauElement.size();
-
-            }
-
-            else  if(Element::tableauElement[i]->estPoussable()) {
-                if((m_position.x - 2) >= 0 ) {
-
-                    for(j=0; j<Element::tableauElement.size(); j++) {
-                        if(j != i ) {
-                            if((Element::tableauElement[i]->getPosition().x  - 1)== Element::tableauElement[j]->getPosition().x  && Element::tableauElement[i]->getPosition().y  == Element::tableauElement[j]->getPosition().y ) {
-                                obstacle=true;
-                                if(Element::tableauElement[j]->estFranchissable()) {
-                                    if(Element::tableauElement[j]->getType() == OBJECTIF) {
-                                        Objectif* cast;
-                                        cast = dynamic_cast<Objectif*>(Element::tableauElement[j]);
-                                        cast->testEtat();
-
-                                        if(cast->estResolu()) {
-                                            obstacle = true;
-                                        } else obstacle = false;
-
-                                    } else   obstacle = false;
-
-                                }
-
-                            }
-                        }
-
-                    }
-                    if(!obstacle) {
-
-
-                        m_position.x-=1;
-                        m_deplacement.x = (-1) * VECTEUR_DEPLACEMENT_X ;
-                        m_deplacement.y= (-1) *  VECTEUR_DEPLACEMENT_Y ;
-                        sortieCarte=false;
-                        pousserElement(*Element::tableauElement[i]);
-                    }
-
-                }
-
-            } else  if(Element::tableauElement[i]->estFranchissable()) {
-
-                 bool presence = false;
-                for(unsigned int j=0;j<Element::tableauElement.size();j++)
-                {
-                    if(j!= i )
-                    {
-                            if(Element::tableauElement[j]->getPosition() == Element::tableauElement[i]->getPosition())
-                            {
-
-                                 presence = true;
-
-                            }
-                    }
-
-
-
-                }
-                if(!presence)
-                {
-                m_position.x-=1;
-                m_deplacement.x = (-1) * VECTEUR_DEPLACEMENT_X ;
-                m_deplacement.y= (-1) *  VECTEUR_DEPLACEMENT_Y ;
-                sortieCarte=false;
-                }
-            }
-        }
-
-
+    if(!m_enDeplacement)
+    {
+
+        m_direction = direction; // direction dans laquel on veut se deplacer
+        m_positionDepartAnimation= m_sprite.getPosition(); // Offset pour le deplacement du sprite personnage
+        sf::Vector2f  vecteurDep,deplacement; // vecteur servant a valider le deplacement
+        bool obstacle = false; // pour verifier si oui ou non il y a un obstacle
+        int x,y=0;
+
+        if(direction==1) vecteurDep= sf::Vector2f(0,-1);
+        if(direction==2) vecteurDep= sf::Vector2f(1,0);
+        if(direction==3) vecteurDep= sf::Vector2f(0,1);
+        if(direction==4) vecteurDep= sf::Vector2f(-1,0);
+
+        deplacement= vecteurDep;
+
+        if(direction==1 ) { m_deplacement.x = VECTEUR_DEPLACEMENT_X;m_deplacement.y = VECTEUR_DEPLACEMENT_Y * vecteurDep.y;}
+         if(direction == 3) { m_deplacement.x = VECTEUR_DEPLACEMENT_X*(-1);m_deplacement.y = VECTEUR_DEPLACEMENT_Y ;}
+        if(direction==2 ) { m_deplacement.x = VECTEUR_DEPLACEMENT_X * vecteurDep.x;m_deplacement.y = VECTEUR_DEPLACEMENT_Y;}
+        if(direction == 4) { m_deplacement.x = VECTEUR_DEPLACEMENT_X * (-1);m_deplacement.y = VECTEUR_DEPLACEMENT_Y *(-1);}
+
+
+        if((m_position.x + vecteurDep.x >=0 && m_position.x + vecteurDep.x < m_carte->getTaille() )&&  (m_position.y + vecteurDep.y >=0 && m_position.y + vecteurDep.y < m_carte->getTaille() ))
+        { //si le deplacement nous fait rester sur la carte.
+                      y=m_position.y + vecteurDep.y;
+                      x=m_position.x + vecteurDep.x;
+
+                      if(jeu.getTabElement()[y][x] != nullptr)//Si il y a un element
+                      {
+                          obstacle = true;
+
+                      }
+
+                  }
+
+              if(!obstacle)  {m_position += deplacement; sortieCarte=false;}// Si pas d'element , on se deplace.
+
+              else if (! jeu.getTabElement()[y][x]->estFranchissable()) //Si l'element present n'est pas franchissable
+              {
+                 if( jeu.getTabElement()[y][x]->estPoussable()) //mais que c'est un element poussable
+                 {
+                     if(jeu.getTabElement()[y + vecteurDep.y][x + vecteurDep.x] == nullptr &&
+                        (x + vecteurDep.x >=0 && x + vecteurDep.x <= m_carte->getTaille() )  &&
+                        (y + vecteurDep.y >=0 && y + vecteurDep.y <= m_carte->getTaille() )) // et qu'il n'y a rien devant celui-ci  et que l'on sera pas hors de la carte après le deplacement
+                     {
+                         m_position += deplacement;
+                          pousserElement(* jeu.getTabElement()[y][x], jeu); // On pousse la caisse
+                           sortieCarte=false;
+                     }
+                     else{} // sinon on ne fait rien
+                 }
+              }
     }
-
-    if(!sortieCarte) {
+        if(!sortieCarte)
+    {
         m_enDeplacement =true;
         m_tempsAnimation=sf::seconds(0);
         m_horlogeAnimation.restart();
-
     }
 
-    if(direction <1 || direction >4) {
+    if(direction <1 || direction >4)
+    {
         m_enDeplacement = false;
 
     }
 
+        }
 
 
 
-
-
-}
 
 
 void Joueur::animer()
 {
-    if(m_enDeplacement) {
+    if(m_enDeplacement)
+    {
 
 
-        if(m_horlogeAnimation.getElapsedTime().asMilliseconds() -m_tempsAnimation.asMilliseconds()> 30) {
+        if(m_horlogeAnimation.getElapsedTime().asMilliseconds() -m_tempsAnimation.asMilliseconds()> 30)
+        {
 
             m_sprite.setPosition( m_positionDepartAnimation.x +  (m_deplacement.x * ( m_tempsAnimation.asMilliseconds() / (float)TEMPSANIMATION) )   , m_positionDepartAnimation.y+ (m_deplacement.y * ( m_tempsAnimation.asMilliseconds() / (float)TEMPSANIMATION)) );
             m_tempsAnimation +=  m_horlogeAnimation.getElapsedTime() - m_tempsAnimation;
 
-            if(m_direction ==1) {
+            if(m_direction ==1)
+            {
 
 
-                if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 ) {
-                    if(frame != 1) {
+                if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 )
+                {
+                    if(frame != 1)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(0,0,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 1;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>= TEMPSANIMATION / 4 && m_tempsAnimation.asMilliseconds()<  (2 * TEMPSANIMATION )/ 4 ) {
-                    if(frame != 2) {
+                else if(m_tempsAnimation.asMilliseconds()>= TEMPSANIMATION / 4 && m_tempsAnimation.asMilliseconds()<  (2 * TEMPSANIMATION )/ 4 )
+                {
+                    if(frame != 2)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(m_tailleTexture.x / 4,0,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 2;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>= (2 * TEMPSANIMATION ) / 4  && m_tempsAnimation.asMilliseconds()<  (3 * TEMPSANIMATION )/ 4 ) {
-                    if(frame != 3) {
+                else if(m_tempsAnimation.asMilliseconds()>= (2 * TEMPSANIMATION ) / 4  && m_tempsAnimation.asMilliseconds()<  (3 * TEMPSANIMATION )/ 4 )
+                {
+                    if(frame != 3)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(2*m_tailleTexture.x/4,0,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 3;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>=(3 * TEMPSANIMATION )/ 4 && m_tempsAnimation.asMilliseconds() <  (TEMPSANIMATION) ) {
-                    if(frame != 4) {
+                else if(m_tempsAnimation.asMilliseconds()>=(3 * TEMPSANIMATION )/ 4 && m_tempsAnimation.asMilliseconds() <  (TEMPSANIMATION) )
+                {
+                    if(frame != 4)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(3*m_tailleTexture.x/4,0,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 4;
                     }
                 }
 
-                else {
-                    if(frame != 1) {
+                else
+                {
+                    if(frame != 1)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(0,0,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 1;
                     }
@@ -532,39 +261,50 @@ void Joueur::animer()
 
             }
 
-            if(m_direction ==2) {
+            if(m_direction ==2)
+            {
 
 
-                if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 ) {
-                    if(frame != 1) {
+                if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 )
+                {
+                    if(frame != 1)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(0,     m_tailleTexture.y/4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 1;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>= TEMPSANIMATION / 4 && m_tempsAnimation.asMilliseconds()<  (2 * TEMPSANIMATION )/ 4 ) {
-                    if(frame != 2) {
+                else if(m_tempsAnimation.asMilliseconds()>= TEMPSANIMATION / 4 && m_tempsAnimation.asMilliseconds()<  (2 * TEMPSANIMATION )/ 4 )
+                {
+                    if(frame != 2)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(m_tailleTexture.x / 4,    m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 2;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>= (2 * TEMPSANIMATION ) / 4  && m_tempsAnimation.asMilliseconds()<  (3 * TEMPSANIMATION )/ 4 ) {
-                    if(frame != 3) {
+                else if(m_tempsAnimation.asMilliseconds()>= (2 * TEMPSANIMATION ) / 4  && m_tempsAnimation.asMilliseconds()<  (3 * TEMPSANIMATION )/ 4 )
+                {
+                    if(frame != 3)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(2*m_tailleTexture.x/4,    m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 3;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>=(3 * TEMPSANIMATION )/ 4 && m_tempsAnimation.asMilliseconds() <  (TEMPSANIMATION) ) {
-                    if(frame != 4) {
+                else if(m_tempsAnimation.asMilliseconds()>=(3 * TEMPSANIMATION )/ 4 && m_tempsAnimation.asMilliseconds() <  (TEMPSANIMATION) )
+                {
+                    if(frame != 4)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(3*m_tailleTexture.x/4, m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 4;
                     }
                 }
 
-                else {
-                    if(frame != 1) {
+                else
+                {
+                    if(frame != 1)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(0,m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 1;
                     }
@@ -576,39 +316,50 @@ void Joueur::animer()
             }
 
 
-            if(m_direction ==3) {
+            if(m_direction ==3)
+            {
 
 
-                if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 ) {
-                    if(frame != 1) {
+                if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 )
+                {
+                    if(frame != 1)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(0,     2*m_tailleTexture.y/4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 1;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>= TEMPSANIMATION / 4 && m_tempsAnimation.asMilliseconds()<  (2 * TEMPSANIMATION )/ 4 ) {
-                    if(frame != 2) {
+                else if(m_tempsAnimation.asMilliseconds()>= TEMPSANIMATION / 4 && m_tempsAnimation.asMilliseconds()<  (2 * TEMPSANIMATION )/ 4 )
+                {
+                    if(frame != 2)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(m_tailleTexture.x / 4,    2*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 2;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>= (2 * TEMPSANIMATION ) / 4  && m_tempsAnimation.asMilliseconds()<  (3 * TEMPSANIMATION )/ 4 ) {
-                    if(frame != 3) {
+                else if(m_tempsAnimation.asMilliseconds()>= (2 * TEMPSANIMATION ) / 4  && m_tempsAnimation.asMilliseconds()<  (3 * TEMPSANIMATION )/ 4 )
+                {
+                    if(frame != 3)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(2*m_tailleTexture.x/4,    2*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 3;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>=(3 * TEMPSANIMATION )/ 4 && m_tempsAnimation.asMilliseconds() <  (TEMPSANIMATION) ) {
-                    if(frame != 4) {
+                else if(m_tempsAnimation.asMilliseconds()>=(3 * TEMPSANIMATION )/ 4 && m_tempsAnimation.asMilliseconds() <  (TEMPSANIMATION) )
+                {
+                    if(frame != 4)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(3*m_tailleTexture.x/4, 2*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 4;
                     }
                 }
 
-                else {
-                    if(frame != 1) {
+                else
+                {
+                    if(frame != 1)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(0, 2*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 1;
                     }
@@ -619,39 +370,50 @@ void Joueur::animer()
 
             }
 
-            if(m_direction ==4) {
+            if(m_direction ==4)
+            {
 
 
-                if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 ) {
-                    if(frame != 1) {
+                if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 )
+                {
+                    if(frame != 1)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(0,     3*m_tailleTexture.y/4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 1;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>= TEMPSANIMATION / 4 && m_tempsAnimation.asMilliseconds()<  (2 * TEMPSANIMATION )/ 4 ) {
-                    if(frame != 2) {
+                else if(m_tempsAnimation.asMilliseconds()>= TEMPSANIMATION / 4 && m_tempsAnimation.asMilliseconds()<  (2 * TEMPSANIMATION )/ 4 )
+                {
+                    if(frame != 2)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(m_tailleTexture.x / 4,    3*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 2;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>= (2 * TEMPSANIMATION ) / 4  && m_tempsAnimation.asMilliseconds()<  (3 * TEMPSANIMATION )/ 4 ) {
-                    if(frame != 3) {
+                else if(m_tempsAnimation.asMilliseconds()>= (2 * TEMPSANIMATION ) / 4  && m_tempsAnimation.asMilliseconds()<  (3 * TEMPSANIMATION )/ 4 )
+                {
+                    if(frame != 3)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(2*m_tailleTexture.x/4,    3*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 3;
                     }
                 }
 
-                else if(m_tempsAnimation.asMilliseconds()>=(3 * TEMPSANIMATION )/ 4 && m_tempsAnimation.asMilliseconds() <  (TEMPSANIMATION) ) {
-                    if(frame != 4) {
+                else if(m_tempsAnimation.asMilliseconds()>=(3 * TEMPSANIMATION )/ 4 && m_tempsAnimation.asMilliseconds() <  (TEMPSANIMATION) )
+                {
+                    if(frame != 4)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(3*m_tailleTexture.x/4, 3*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 4;
                     }
                 }
 
-                else {
-                    if(frame != 1) {
+                else
+                {
+                    if(frame != 1)
+                    {
                         m_sprite.setTextureRect(sf::IntRect(0, 3*m_tailleTexture.y /4,m_tailleTexture.x/4 , m_tailleTexture.y /4));
                         frame = 1;
                     }

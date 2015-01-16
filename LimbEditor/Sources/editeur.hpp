@@ -1,4 +1,10 @@
 
+
+#ifndef EDITEUR
+#define EDITEUR
+
+#include <SFML/Audio.hpp>
+
 class Carte;
 
 
@@ -17,6 +23,9 @@ private:
 
     sf:: Text version;
 
+    sf::SoundBuffer m_clickbuffer;
+    sf::Sound m_click;
+
     int m_pageMenu;
     bool m_editeurOuvert;
 
@@ -24,11 +33,6 @@ private:
 
     bool m_interfaceUtilise;
     Type_element m_elementSelectionner;
-
-
-
-
-
 
 
     RessourceHolder* m_ressourceHolder;
@@ -48,6 +52,8 @@ public:
     void menuPrincipal();
     void editer();
 
+    void gestionEvenement();
+
 
     bool creerCarte(std::string nom,std::string taille);
 
@@ -60,3 +66,4 @@ public:
 
 };
 
+#endif // EDITEUR

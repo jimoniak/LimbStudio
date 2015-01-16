@@ -16,7 +16,9 @@
 
 int main()
 {
-    HFENETRE = 768;
+
+
+    HFENETRE = sf::VideoMode::getDesktopMode ().height - 30;
     LFENETRE = 1024;
     Editeur editeur;
 

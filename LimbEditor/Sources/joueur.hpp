@@ -1,10 +1,8 @@
 
-#ifndef JOUEUR
-#define JOUEUR
 
 
 
-class Jeu;
+
 
 
 class Joueur {
@@ -17,7 +15,7 @@ private:
     int frame;
     int m_coteCarte;
 
-    Carte *m_carte;
+    Carte*m_carte;
     sf::RenderWindow *m_fenetre;
 
     //Attributs liés aux deplacements et à l'animation du personnage.
@@ -35,20 +33,19 @@ public:
     //constructeur:
     Joueur(sf::RenderWindow &fenetre,Carte *carte);
     Joueur(const Joueur&);
-    ~Joueur();
 
 
     //methodes utiles
 
     bool chargementTexture();
-    void gererClavier(Jeu &jeu);
+    void gererClavier();
 
-    void pousserElement(Element &element,Jeu &jeu);
+    void pousserElement(Element &element);
 
 
     //methodes de deplacement:
     bool  enDeplacement();
-    void deplacer(int direction,Jeu &jeu); // en case
+    void deplacer(int direction); // en case
     void animer();
 
 
@@ -61,5 +58,3 @@ public:
     sf::Sprite const getSprite();
 
 };
-
-#endif // JOUEUR

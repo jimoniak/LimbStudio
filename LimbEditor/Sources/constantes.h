@@ -23,16 +23,14 @@ depot officiel : https://github.com/jimoniak/LimbEscape
 #define DEMI_LTILE               LARGEUR_TILE / 2
 #define DEMI_HTILE               HAUTEUR_TILE / 2
 #define COTECARTE          10
-#define TAILLE_MAX           15
-#define TAILLE_MIN             5
 #define NOMBRECASE  COTECARTE * COTECARTE
-#define TEMPSANIMATION 500
+#define TEMPSANIMATION 400
 #define VECTEUR_DEPLACEMENT_X LARGEUR_TILE / 2
 #define VECTEUR_DEPLACEMENT_Y HAUTEUR_TILE / 2
 #define NOMBRE_FRAME 4
 
 #define OFFSET_CARTE  0- (COTECARTE * LARGEUR_TILE) / 2
-#define VERSION "Version alpha 0.7"
+#define VERSION "Version alpha 0.6"
 
 
 

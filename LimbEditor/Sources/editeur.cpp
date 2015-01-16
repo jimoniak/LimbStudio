@@ -2,6 +2,7 @@
 
 
 #include <SFML/Graphics.hpp>
+
 #include <GUI.hpp>
 #include <iostream>
 
@@ -48,6 +49,12 @@ Editeur::Editeur() :fenetrePrincipale(sf::VideoMode(LFENETRE, HFENETRE), "LimbEd
      version.setColor(sf::Color::White);
      version.setPosition(10,HFENETRE-25);
      version.setString("test");
+
+
+    if (!m_clickbuffer.loadFromFile("Data/Sounds/Clicks/click.wav")) cerr<<"Impossible de charger click.wav"<<endl;
+
+    m_click.setBuffer(m_clickbuffer);
+
 
 }
 
@@ -309,11 +316,12 @@ void Editeur::menuPrincipal()
 
             if(editer.actionner())
             {
+                m_click.play();
                 m_pageMenu = 1;
             }
             if(quitter.actionner())
             {
-
+                m_click.play();
                 fenetrePrincipale.close();
             }
 
@@ -322,10 +330,12 @@ void Editeur::menuPrincipal()
 
             if(retour.actionner())
             {
+                m_click.play();
                 m_pageMenu -- ;
             }
             if(creer.actionner())
             {
+                m_click.play();
                 std::string nom;
                 std::string taille;
                 nom =  saisieNom.getTexte() ;
@@ -348,7 +358,7 @@ void Editeur::menuPrincipal()
 
             if(charger.actionner())
             {
-
+                m_click.play();
                 std::string test;
                 test =  saisieNom.getTexte() ;
                 if(chargerCarte(test))
@@ -370,7 +380,7 @@ void Editeur::menuPrincipal()
         case 2:
             if(quitter.actionner())
             {
-
+                m_click.play();
                 fenetrePrincipale.close();
             }
 
@@ -486,7 +496,7 @@ void Editeur::editer()
             if (event.type == sf::Event::Closed)
                 fenetrePrincipale.close();
 
-            if (event.type == sf::Event::MouseButtonPressed)
+            if (event.type == sf::Event::MouseButtonReleased)
             {
                 if (event.mouseButton.button == sf::Mouse::Left)
                 {
@@ -506,47 +516,51 @@ void Editeur::editer()
 
         if(m_interfaceEdition[0].actionner())
         {
-
+            m_click.play();
             m_interfaceUtilise=true;
             m_elementSelectionner=CAISSE;
         }
         if(m_interfaceEdition[1].actionner())
         {
-
+            m_click.play();
             m_interfaceUtilise=true;
             m_elementSelectionner=MUR;
         }
         if(m_interfaceEdition[2].actionner())
         {
-
+            m_click.play();
             m_interfaceUtilise=true;
             m_elementSelectionner=OBJECTIF;
         }
         if(m_interfaceEdition[3].actionner())
         {
-
+            m_click.play();
             m_interfaceUtilise=true;
             m_elementSelectionner=DEPART;
         }
         if(m_interfaceEdition[4].actionner())
         {
+            m_click.play();
             m_interfaceUtilise=true;
             m_elementSelectionner=RIEN;
         }
         if(sauvegarder.actionner())
         {
+            m_click.play();
             sauvergarderCarte();
+            m_interfaceUtilise=true;
         }
 
           if(retour.actionner())
         {
+            m_click.play();
             m_pageMenu--;
              delete m_carte;
              m_carte=nullptr;
             return ;
         }
 
-        if(!m_interfaceUtilise )
+        if(!sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
 
             if(sourisCliq==true)
@@ -616,18 +630,20 @@ void Editeur::editer()
 }
 
 
+
 bool Editeur::creerCarte(std::string nom,std::string taille)
 {
 
     unsigned  int taillecote;
     if(taille != "_" && taille != "")
     {
+        cout<<"test"<<endl;
          if(taille.size()>0) taillecote=utils::ConvStringInt(taille);
          cout<<taillecote<<endl;
 
     }
 
-    if(taillecote<=5 || taillecote>=15)   taillecote = 10;
+    if(taillecote<5 || taillecote>15)   taillecote = 10;
     m_carte = new Carte(nom,taillecote);
 
     if(m_ressourceHolder!= nullptr) delete m_ressourceHolder;

@@ -91,10 +91,14 @@ void Carte::creerElement(RessourceHolder &rholder)
 
 Carte::Carte()
 {
-    m_nom = "default";
+
     m_packRessource="Default";
      m_textureBase=nullptr;
      m_base=nullptr;
+
+      if (!m_popbuffer.loadFromFile("Data/Sounds/Clicks/pop.wav"))   cerr<<"Impossible de charger click.wav"<<endl;
+        m_pop.setBuffer(m_popbuffer);
+
 
 }
 
@@ -103,6 +107,10 @@ Carte::Carte(std::string nom,int taille)
 {
     m_nom = nom;
     m_tailleCote = taille;
+
+     if (!m_popbuffer.loadFromFile("Data/Sounds/Clicks/pop.wav"))   cerr<<"Impossible de charger click.wav"<<endl;
+     m_pop.setBuffer(m_popbuffer);
+
 
     for(unsigned int i = 0; i<m_tailleCote *m_tailleCote; i++)
 
@@ -160,10 +168,21 @@ bool Carte::sauvegarder()
         }
         else
         {
+            int taillestring;
+            taillestring=m_nom.size();
+            cout<<"tailleString: "<< taillestring<<endl;
+
             sauvegarde.write ((char*)&m_tailleCote, sizeof (m_tailleCote));
-            sauvegarde.write ((char*)m_nom.c_str(), sizeof (std::string));
-            sauvegarde.write ((char*)m_packRessource.c_str(), sizeof(std::string));
-            cout<<m_tabElement.size()<<endl;
+            sauvegarde.write ((char*)&taillestring, sizeof(int));
+            sauvegarde.write ((char*)m_nom.c_str(), taillestring);
+
+            taillestring=m_packRessource.size();
+            cout<<"tailleString: "<< taillestring<<endl;
+            sauvegarde.write ((char*)&taillestring,sizeof(int));
+            sauvegarde.write ((char*)m_packRessource.c_str(), taillestring);
+            cout<< m_packRessource<<endl;
+
+         //   cout<<m_tabElement.size()<<endl;
 
             for(unsigned int i =0 ; i< m_tabElement.size(); i++)
             {
@@ -204,10 +223,23 @@ bool Carte::charger(std::string const &nom)
         }
         else
         {
+            int taillestring;
+            int taille2;
 
             chargement.read ((char*)&m_tailleCote, sizeof (m_tailleCote));
-            chargement.read ((char*)m_nom.c_str(), sizeof(std::string));
-            chargement.read ((char*)m_packRessource.c_str(),sizeof(std::string));
+
+            chargement.read((char*)&taillestring,sizeof(int));
+            cout<<"tailleString: "<< taillestring<<endl;
+            taillestring;
+            m_nom.resize(taillestring);
+            chargement.read ((char*)m_nom.c_str(), taillestring);
+
+
+            chargement.read((char*)&taille2,sizeof(int));
+            cout<<"tailleString: "<< taille2<<endl;
+           // taille2 = 7;
+            m_packRessource.resize(taille2);
+            chargement.read ((char*)m_packRessource.c_str(),taille2);
 
 
 
@@ -246,6 +278,7 @@ bool Carte::charger(std::string const &nom)
 void Carte::ajouterElement(sf::Vector2f position,Type_element element,RessourceHolder &rholder)
 {
 
+
     if(m_tabElement[(m_tailleCote * int(position.y ))+ int(position.x)] == element)
     {
 
@@ -263,18 +296,22 @@ void Carte::ajouterElement(sf::Vector2f position,Type_element element,RessourceH
         switch(element)
         {
         case CAISSE:
+            m_pop.play();
             m_ElementHolder.push_back(new Caisse(position,&rholder));
             m_tabElement[(m_tailleCote * int(position.y ))+ int(position.x)] = element;
             break;
         case MUR:
+            m_pop.play();
             m_ElementHolder.push_back(new Mur(position,&rholder));
             m_tabElement[(m_tailleCote * int(position.y ))+ int(position.x)] = element;
             break;
         case OBJECTIF:
+            m_pop.play();
             m_ElementHolder.push_back(new Objectif(position,&rholder));
             m_tabElement[(m_tailleCote * int(position.y ))+ int(position.x)] = element;
             break;
         case DEPART:
+            m_pop.play();
             do
             {
                 if(m_ElementHolder.size()>0)

@@ -16,10 +16,14 @@ depot officiel : https://github.com/jimoniak/LimbEscape
 #include <string>
 #include<SFML/Graphics.hpp>
 
-#include "outils.hpp"
+
 
 #include <ios>
 #include <sstream>
+
+
+
+#include "outils.hpp"
 
 namespace utils {
 
@@ -30,7 +34,6 @@ std::string  ConvertionFltString(float nombre )
     return os.str();
 
 }
-
 
 
 }

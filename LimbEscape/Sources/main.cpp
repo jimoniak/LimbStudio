@@ -47,7 +47,7 @@ int main()
 {
     debug = true;
 
-    HFENETRE = 768;
+    HFENETRE = sf::VideoMode::getDesktopMode ().height - 30;
     LFENETRE = 1024;
 
 

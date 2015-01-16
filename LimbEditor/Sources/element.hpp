@@ -91,7 +91,7 @@ public:
 
     Objectif(sf::Vector2f position,RessourceHolder *rholder);
 
-    Objectif(sf::Vector2f position,RessourceHolder &rholder);
+
 
 
     void testEtat();

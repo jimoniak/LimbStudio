@@ -4,7 +4,7 @@
 
 
 
-
+#include <SFML/Audio.hpp>
 
 class Carte
 {
@@ -25,7 +25,8 @@ private:
 
     RessourceHolder *rholder;
 
-
+     sf::SoundBuffer m_popbuffer;
+     sf::Sound m_pop;
 
 
 

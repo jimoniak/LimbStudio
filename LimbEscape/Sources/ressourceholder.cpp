@@ -52,7 +52,7 @@ sf::Texture RessourceHolder::getTextureElem(int element) //envoyer une enum
 {
 
     //std::cout<<element<<std::endl;
-    if(element>5 || element<0) std::cout<<"Erreur avec le numero envoye a ElementHolder" <<std::endl;
+    if(element>5 || element<0)  std::cout<<"Erreur avec le numero envoye a ElementHolder" <<std::endl;
     else
     {
         return m_tableTexture[element];

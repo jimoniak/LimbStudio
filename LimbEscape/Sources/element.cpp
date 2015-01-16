@@ -20,7 +20,7 @@ depot officiel : https://github.com/jimoniak/LimbEscape
 #include "constantes.h"
 #include "element.hpp"
 
-bool Element::departPose = false ;
+bool Element::departPose = false;
 std::vector<Element*> Element::tableauElement;
 
 Element::Element()
@@ -90,7 +90,9 @@ Caisse::Caisse(sf::Vector2f position,RessourceHolder *rholder)
 
 
 }
-Caisse::~Caisse() {}
+Caisse::~Caisse() {
+std::cout<<"destruction"<<std::endl;
+}
 
 void Caisse::actualiserPosition(sf::Vector2f position)
 {
@@ -116,11 +118,13 @@ Objectif::Objectif(sf::Vector2f position,RessourceHolder *rholder)
     m_sprite.setTexture(m_apparence);
     m_position = position;
     actualiserPosition(m_position);
-    m_poussable = false;
+    m_poussable    = false;
     m_franchissable=true;
-    m_element = OBJECTIF;
+    m_element       = OBJECTIF;
 
 }
+
+ Objectif::~Objectif(){}
 
 void Objectif::testEtat()
 {
@@ -165,6 +169,7 @@ Depart::Depart(sf::Vector2f position,RessourceHolder *rholder)
 
     m_element = DEPART;
 }
+Depart::~Depart(){}
 
 void Depart::actualiserPosition(sf::Vector2f position)
 {
@@ -187,6 +192,7 @@ Mur::Mur(sf::Vector2f position,RessourceHolder *rholder)
     m_element = MUR;
 
 }
+Mur::~Mur(){};
 
 
 void Mur::actualiserPosition(sf::Vector2f position)

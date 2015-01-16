@@ -15,10 +15,6 @@ protected:
 
     bool m_poussable;// true = poussable, false= statique
     bool m_franchissable;
-
-
-
-
     enum Type_element m_element;
     static bool departPose ;
 
@@ -32,7 +28,6 @@ public:
     static std::vector<Element*> tableauElement;
     Element();
     virtual ~Element();
-
 
     bool  estPoussable();
     bool  estFranchissable();
@@ -55,7 +50,7 @@ class Caisse : public Element {
 public:
       Caisse();
       Caisse(sf::Vector2f position,RessourceHolder *rholder);
-    ~Caisse();
+     ~Caisse();
 
     virtual void actualiserPosition(sf::Vector2f position);
     virtual void Deplacer(sf::Vector2f vecteurDeplacement);
@@ -69,6 +64,7 @@ private:
 public:
     Objectif();
     Objectif(sf::Vector2f position,RessourceHolder *rholder);
+    ~Objectif();
 
     void testEtat();
     void changerEtat(bool resolu);
@@ -83,18 +79,19 @@ class Depart: public Element {
 public:
     Depart();
     Depart(sf::Vector2f position,RessourceHolder *rholder);
-
+    ~Depart();
 
     void actualiserPosition(sf::Vector2f position);
 
 };
+
 
 class Mur: public Element {
 private:
 public:
     Mur();
     Mur(sf::Vector2f position,RessourceHolder *rholder);
-
+    ~Mur();
     void actualiserPosition(sf::Vector2f position);
 
 
