@@ -4,3 +4,13 @@ Lisez moi.txt
 Dossier Data et les Dlls  necessaire au fonctionnement de chaque application, 
 
 a copier dans le dossier racine de chacune d'elle sauf Mystogen.
+
+Les Commandes:
+
+LimbEscape: 
+ZQSD pour deplacer sur la carte. Les touches directionnelles pour deplacer la vue (utile sur les grandes cartes)
+Souris pour clique sur bouton...
+
+LimbEditor:
+Les touches directionnelles pour deplacer la vue
+souris pour cliquer sur les boutons/selectionner et deposer element.
