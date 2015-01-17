@@ -156,7 +156,7 @@ void Joueur::deplacer(int direction,Jeu &jeu)
 
                       }
 
-                  }
+
 
               if(!obstacle)  {m_position += deplacement; sortieCarte=false;}// Si pas d'element , on se deplace.
 
@@ -175,6 +175,7 @@ void Joueur::deplacer(int direction,Jeu &jeu)
                      else{} // sinon on ne fait rien
                  }
               }
+        }
     }
         if(!sortieCarte)
     {

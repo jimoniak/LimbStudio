@@ -6,7 +6,7 @@
 #include "ressourceholder.hpp"
 
 
-RessourceHolder::RessourceHolder()
+RessourceHolder::RessourceHolder()// Par default
 {
     m_tableTexture.push_back( sf::Texture());
     m_tableTexture[0].loadFromFile("Data/Default/Elements/Caisse.png");
@@ -23,7 +23,7 @@ RessourceHolder::RessourceHolder()
 }
 
 
-RessourceHolder::RessourceHolder(std::string nomPack)
+RessourceHolder::RessourceHolder(std::string nomPack) //Charge un pack particulier.
 {
     m_tableTexture.push_back( sf::Texture());
     m_tableTexture[0].loadFromFile("Data/"+nomPack+"/Elements/Caisse.png");
@@ -52,11 +52,13 @@ sf::Texture RessourceHolder::getTextureElem(int element) //envoyer une enum
 {
 
     //std::cout<<element<<std::endl;
-    if(element>5 || element<0)  std::cout<<"Erreur avec le numero envoye a ElementHolder" <<std::endl;
+    if(element>5 || element<0) {std::cout<<"Erreur avec le numero envoye a ElementHolder" <<std::endl;
+    return m_tableTexture[0];}
     else
     {
         return m_tableTexture[element];
     }
+
 }
 
 

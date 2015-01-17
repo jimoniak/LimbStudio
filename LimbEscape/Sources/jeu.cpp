@@ -306,6 +306,9 @@ void Jeu::jouer()
 
         if(recharger.actionner())
         {
+                chargerCarte(m_carte->getNom());
+                if(m_joueur != nullptr ) delete m_joueur; //joueur...
+                m_joueur = new Joueur(fenetrePrincipale,m_carte);
 
         }
         if(retour.actionner())
