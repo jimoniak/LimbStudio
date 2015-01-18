@@ -26,7 +26,6 @@ std::vector<Element*> Element::tableauElement;
 Element::Element()
 {
     Element::tableauElement.push_back(this);
-
 }
 Element::~Element()
 {
@@ -91,7 +90,7 @@ Caisse::Caisse(sf::Vector2f position,RessourceHolder *rholder)
 
 }
 Caisse::~Caisse() {
-std::cout<<"destruction"<<std::endl;
+//std::cout<<"destruction d'une caisse "<<std::endl;
 }
 
 void Caisse::actualiserPosition(sf::Vector2f position)
@@ -124,7 +123,10 @@ Objectif::Objectif(sf::Vector2f position,RessourceHolder *rholder)
 
 }
 
- Objectif::~Objectif(){}
+ Objectif::~Objectif()
+ {
+ //std::cout<<"destruction d'un objectif "<<std::endl;
+ }
 
 void Objectif::testEtat()
 {
@@ -169,7 +171,11 @@ Depart::Depart(sf::Vector2f position,RessourceHolder *rholder)
 
     m_element = DEPART;
 }
-Depart::~Depart(){}
+Depart::~Depart()
+{
+std::cout<<"destruction du depart "<<std::endl;
+
+}
 
 void Depart::actualiserPosition(sf::Vector2f position)
 {
@@ -192,7 +198,11 @@ Mur::Mur(sf::Vector2f position,RessourceHolder *rholder)
     m_element = MUR;
 
 }
-Mur::~Mur(){};
+Mur::~Mur()
+{
+//std::cout<<"destruction du mur"<<std::endl;
+
+};
 
 
 void Mur::actualiserPosition(sf::Vector2f position)

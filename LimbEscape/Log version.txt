@@ -1,0 +1,35 @@
+*alpha 0.8: 
+
+corrections: ajout sécurité RessourceHolder 
+Ajout de fonction restart en jeu (recharger la carte pour retenter le puzzle) 
+Ajout d'un systeme de liaison de niveau 
+Ajout d'un chronometre.
+Ajout des Packs ressources fonctionnels. 
+
+
+*alpha .7:
+Ajout d'une fonction victoire qui fait revenir au menu principal 
+Ajout d'un bouton retour en jeu 
+éecriture du systeme de collision pour corriger des bugs 
+*Correction de bug d'affichage (caisse affiché sur la bonne couche) 
+
+
+
+*alpha .6
+ajout de chargement de carte
+systeme de chargement aléatoire de carte
+menu developpé
+ajout de saisie de nom de carte.
+correction de certains bugs.
+
+
+*alpha .2
+ ajout du menu principal.
+
+*alpha .1
+ correction de bug de collisions
+ ajout de l'introduction
+ pré-implentation d'un systeme multiplateforme
+
+*alpha .0
+premier debug

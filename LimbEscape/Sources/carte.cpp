@@ -38,6 +38,8 @@ void Carte::creationBase()
     if(!m_imageTile.loadFromFile("Data/Default/Tiles/Tile.png"))    std::cout<<"Impossible d'ouvrir Tile.png"<<std::endl;
 
     m_imageCarte.create (m_tailleCote * LARGEUR_TILE, m_tailleCote * HAUTEUR_TILE); //creation du support en memoire où blitter les tiles.
+    m_imageCarte.createMaskFromColor(sf::Color::Black);
+
 
     for(unsigned int j=0; j<m_tailleCote; j++)
     {
@@ -137,10 +139,8 @@ Carte::~Carte()
 {
     for(unsigned int i; i< m_ElementHolder.size(); i++)
     {
-        cout<<m_ElementHolder.size()<<endl;
-        delete m_ElementHolder[i];m_ElementHolder[i] = nullptr;
+      m_ElementHolder[i] = nullptr;
     }
-
 
     m_ElementHolder.clear();
     rholder =nullptr;

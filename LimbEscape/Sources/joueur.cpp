@@ -139,7 +139,7 @@ void Joueur::deplacer(int direction,Jeu &jeu)
 
         deplacement= vecteurDep;
 
-        if(direction==1 ) { m_deplacement.x = VECTEUR_DEPLACEMENT_X;m_deplacement.y = VECTEUR_DEPLACEMENT_Y * vecteurDep.y;}
+         if(direction==1 ) { m_deplacement.x = VECTEUR_DEPLACEMENT_X;m_deplacement.y = VECTEUR_DEPLACEMENT_Y * vecteurDep.y;}
          if(direction == 3) { m_deplacement.x = VECTEUR_DEPLACEMENT_X*(-1);m_deplacement.y = VECTEUR_DEPLACEMENT_Y ;}
         if(direction==2 ) { m_deplacement.x = VECTEUR_DEPLACEMENT_X * vecteurDep.x;m_deplacement.y = VECTEUR_DEPLACEMENT_Y;}
         if(direction == 4) { m_deplacement.x = VECTEUR_DEPLACEMENT_X * (-1);m_deplacement.y = VECTEUR_DEPLACEMENT_Y *(-1);}
@@ -177,7 +177,7 @@ void Joueur::deplacer(int direction,Jeu &jeu)
               }
         }
     }
-        if(!sortieCarte)
+        if(!sortieCarte) //Petite condition permettant d'initialiser l'animation du personnage.
     {
         m_enDeplacement =true;
         m_tempsAnimation=sf::seconds(0);
@@ -190,10 +190,7 @@ void Joueur::deplacer(int direction,Jeu &jeu)
 
     }
 
-        }
-
-
-
+}
 
 
 void Joueur::animer()
