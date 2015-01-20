@@ -55,8 +55,9 @@ public:
     void intro();
     bool demarrer();
     void menuPrincipal();
-    void jouer();
+    std::string menuVignette(std::vector<std::string> const  &liste);
 
+    void jouer();
     bool desallouer();
     bool chargerSuite(std::string const &nom);
     bool chargerCarte(std::string const &nom);
@@ -72,6 +73,6 @@ public:
     void AfficherHud();
 
     void InitNombreObjectif();
-    void rechercheFichier(std:: string chemin, std::string extension);
+    std::vector<std::string> rechercheFichier(std:: string chemin, std::string extension);
 };
 #endif // JEU

@@ -10,7 +10,7 @@
 LimbEscape de Limb'Studio est mis à disposition selon les termes de la licence Creative Commons Attribution - Pas d’Utilisation Commerciale 4.0 International.
 Les autorisations au-delà du champ de cette licence peuvent être obtenues à mail.limbStudio@gmail.com.
 
-depot officiel : https://github.com/jimoniak/LimbEscape
+depot officiel : https://github.com/jimoniak/LimbStudio
 
 */
 #include <SFML/Graphics.hpp>
@@ -35,6 +35,8 @@ depot officiel : https://github.com/jimoniak/LimbEscape
 #include "gestionSouris.hpp"
 #include "joueur.hpp"
 #include "jeu.hpp"
+
+#include "vignette.hpp"
 
 
 using namespace sf;
@@ -74,7 +76,8 @@ Jeu::Jeu() :fenetrePrincipale(sf::VideoMode(LFENETRE, HFENETRE), "LimbEscape"),
       m_joueur = nullptr;
 
        fenetrePrincipale.setVerticalSyncEnabled(true);
-       rechercheFichier("Cartes\\",".map");
+       m_tabCartes = rechercheFichier("Cartes\\",".map");
+       m_suiteCarte = rechercheFichier("Cartes\\Suites\\",".ste");
 
        m_ptrthis = this;
        m_jouerSuite= false;
@@ -211,24 +214,28 @@ void Jeu::menuPrincipal()
       suite.setTitre("Suites");
       suite.setTailleTexte(15);
 
+      lgui::Bouton choisirSuite(font,&textBoutonR,&textBoutonV);
+      choisirSuite.setTitre("Choisir");
+      choisirSuite.setTailleTexte(15);
+
        lgui::Bouton classique(font,&textBoutonR,&textBoutonV);
       classique.setTitre("Classique");
       classique.setTailleTexte(15);
 
 
      lgui::Bouton charger(font,&textBoutonR,&textBoutonV);
-     charger.setTitre("Charger");
+     charger.setTitre("Choisir");
      charger.setTailleTexte(15);
 
       lgui::Bouton aleatoire(font,&textBoutonR,&textBoutonV);
      aleatoire.setTitre("Aleatoire");
      aleatoire.setTailleTexte(15);
 
-    lgui::ZoneSaisie saisieNom( font, sf::Vector2f(250,30), sf::Vector2f( LFENETRE/2-125, HFENETRE/2 ), sf::Color::Green ,sf::Color::Blue);
 
     jouer.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2 ,HFENETRE /2 - 100));
     esbrouffe.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2 ,HFENETRE /2 + 100 ));
     suite.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2  ,HFENETRE /2 - 100 ));
+    choisirSuite.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2  ,HFENETRE /2  + 50 ));
     classique.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2  ,HFENETRE /2 - 100 ));
     quitter.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x /2,HFENETRE /2+100));
     charger.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x /2  ,HFENETRE /2+100));
@@ -238,11 +245,12 @@ void Jeu::menuPrincipal()
     jouer.setFenetrelie(fenetrePrincipale);
     esbrouffe.setFenetrelie(fenetrePrincipale);
     suite.setFenetrelie(fenetrePrincipale);
+    choisirSuite.setFenetrelie(fenetrePrincipale);
     classique.setFenetrelie(fenetrePrincipale);
     charger.setFenetrelie(fenetrePrincipale);
     aleatoire.setFenetrelie(fenetrePrincipale);
     quitter.setFenetrelie(fenetrePrincipale);
-    saisieNom.setFenetrelie(fenetrePrincipale);
+
     retour.setFenetrelie(fenetrePrincipale);
 
     sf::Event event;
@@ -252,11 +260,6 @@ void Jeu::menuPrincipal()
         while (fenetrePrincipale.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 fenetrePrincipale.close();
-
-                 if(m_pageMenu==2)
-            {
-                saisieNom.actif(event);
-            }
 
         }
 
@@ -268,6 +271,7 @@ void Jeu::menuPrincipal()
             case 0:
         if(jouer.actionner()) {
             m_pageMenu++;
+            m_horlogeEvent.restart();
 
         }
         if(quitter.actionner()) {
@@ -278,14 +282,17 @@ void Jeu::menuPrincipal()
         case 1:
         if(esbrouffe.actionner()) {
             m_pageMenu++;
+            m_horlogeEvent.restart();
 
         }
          if(suite.actionner()) {
             m_pageMenu=3;
+            m_horlogeEvent.restart();
 
         }
         if(retour.actionner()) {
         m_pageMenu--;
+        m_horlogeEvent.restart();
         }
         break;
             case 2:
@@ -300,6 +307,7 @@ void Jeu::menuPrincipal()
                 chargerCarte(carte);
 
                 Jeu::jouer();
+                m_horlogeEvent.restart();
 
 
             }
@@ -307,14 +315,17 @@ void Jeu::menuPrincipal()
             {
 
             std::string nom;
-            nom =  saisieNom.getTexte() ;
-            if(chargerCarte(nom))
+            //nom =  saisieNom.getTexte() ;
+            nom = menuVignette(m_tabCartes);
+            if(nom != "errStr" && chargerCarte(nom))
             Jeu::jouer();
+            m_horlogeEvent.restart();
 
             }
              if(retour.actionner())
             {
             m_pageMenu--;
+            m_horlogeEvent.restart();
             }
 
             break;
@@ -322,16 +333,28 @@ void Jeu::menuPrincipal()
             case 3:
                         if(retour.actionner()) {
                         m_pageMenu =1;
+                        m_horlogeEvent.restart();
                         }
 
                          if(classique.actionner()) {
                          chargerSuite("Default");
                          Jeu::jouer();
+                         m_horlogeEvent.restart();
+                        }
+
+                         if(choisirSuite.actionner()) {
+                             std::string nomSuite;
+                         nomSuite= menuVignette(m_suiteCarte);
+                         if(nomSuite != "errStr") Jeu::jouer();
+                         else std::cout<<"erreur avec le nom d'une suite!"<<std::endl;
+                         m_horlogeEvent.restart();
+
+
                         }
                 break;
         }
 
-        m_horlogeEvent.restart();
+
 
         }
 
@@ -355,7 +378,6 @@ void Jeu::menuPrincipal()
         {
             aleatoire.afficher();
             charger.afficher();
-            saisieNom.afficher();
             retour.afficher();
 
         }
@@ -363,12 +385,149 @@ void Jeu::menuPrincipal()
         {
 
              classique.afficher();
+             choisirSuite.afficher();
              retour.afficher();
         }
         fenetrePrincipale.display();
         }
     }
 
+
+std::string Jeu::menuVignette(std::vector<std::string> const &liste)
+{
+
+     lgui::Bouton pageSuivante(font,&textBoutonR,&textBoutonV);
+       pageSuivante.setTitre("->");
+       pageSuivante.setTailleTexte(15);
+       pageSuivante.setFenetrelie(fenetrePrincipale);
+       pageSuivante.setPosition(sf::Vector2f(LFENETRE * 0.85 -  textBoutonR.getSize().x ,HFENETRE - 0.12 * HFENETRE));
+
+       lgui::Bouton pagePrecedente(font,&textBoutonR,&textBoutonV);
+       pagePrecedente.setTitre("<-");
+       pagePrecedente.setTailleTexte(15);
+       pagePrecedente.setFenetrelie(fenetrePrincipale);
+       pagePrecedente.setPosition(sf::Vector2f( 20,HFENETRE - 0.12 * HFENETRE));
+
+       lgui::Bouton retour(font,&textBoutonR,&textBoutonV);
+       retour.setTitre("Retour");
+       retour.setTailleTexte(15);
+       retour.setFenetrelie(fenetrePrincipale);
+       retour.setPosition(sf::Vector2f( LFENETRE / 2 - (0.1* LFENETRE+ textBoutonR.getSize().x) / 2, HFENETRE - 0.12 * HFENETRE));
+
+       sf::Texture vignette;
+       vignette.loadFromFile("Data/GUI/vignette.png");
+       sf::Texture vignetteS;
+       vignetteS.loadFromFile("Data/GUI/vignetteS.png");
+
+    std::vector<Vignette> tabptrVignette;
+
+    sf::Vector2f positionVignette;
+    unsigned int nombreRange = 3;
+    unsigned int nombreElementRange = 4;
+    unsigned int nombreElementPage = nombreRange * nombreElementRange ;
+
+    unsigned int nbPage = liste.size() / nombreElementPage;
+    unsigned int pageActuelle = 0;
+
+    for(unsigned int i = 0 ; i< liste.size();i++)
+    {
+        tabptrVignette.push_back(Vignette(font));
+         std::string s = liste[i];
+
+        s.resize(liste[i].size() - 4);
+        tabptrVignette[i].setTitre(s);
+        tabptrVignette[i].setFenetrelie(fenetrePrincipale);
+
+        tabptrVignette[i].setTextures(&vignette,&vignetteS);
+        tabptrVignette[i].setScale(1);
+    }
+
+    for(unsigned int i = 0 ; i < (nbPage + 1) &&  i * nombreElementPage < liste.size() ; i++) // 12 elements par page
+    {
+           for(unsigned int j = 0 ; j < nombreRange && i * nombreElementPage + j * nombreElementRange < liste.size() ; j ++) // 3 rangés par page
+           {
+               positionVignette.y = 0.15* HFENETRE + j* HFENETRE * 0.20;
+               for(unsigned int k = 0 ; k< nombreElementRange &&i * nombreElementPage + j * nombreElementRange + k < liste.size();k++) // 4 elements par rangé
+               {
+                   positionVignette.x = 0.1 * LFENETRE + k * LFENETRE * 0.20;
+
+                   tabptrVignette[i*nombreElementPage + j*nombreElementRange + k].setPosition(positionVignette);
+
+               }
+
+           }
+
+    }
+
+    sf::Event event;
+
+    while (fenetrePrincipale.isOpen()) {
+
+        while (fenetrePrincipale.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                fenetrePrincipale.close();
+
+                if(m_horlogeEvent.getElapsedTime().asSeconds() > 0.1) // protection  afin d'eviter d'appuyer sur  deux bouton qui se superpose sur deux page connexes.
+                {
+                        if(pageSuivante.actionner())
+                        {
+                            if(pageActuelle<nbPage)
+                            pageActuelle++;
+                            m_horlogeEvent.restart();
+                        }
+
+                        if(pagePrecedente.actionner())
+                        {
+                            if(pageActuelle>0)
+                            pageActuelle--;
+                            m_horlogeEvent.restart();
+
+                        }
+
+                        if(retour.actionner())
+                        {
+                            return "errStr" ;
+                            m_horlogeEvent.restart();
+
+                        }
+
+                        for(unsigned int  i = 0 ; i<nombreElementPage  && nombreElementPage * pageActuelle +  i < tabptrVignette.size() ; i++)
+                        {
+                                if(tabptrVignette[nombreElementPage * pageActuelle + i ].actionner())
+                                {
+                                    return tabptrVignette[nombreElementPage * pageActuelle + i].getString();
+
+
+
+                                }
+                        }
+
+
+
+                }
+
+                fenetrePrincipale.setView(fenetrePrincipale.getDefaultView());
+                fenetrePrincipale.clear();
+                fenetrePrincipale.draw(fond);
+
+                for(unsigned i = 0 ; i<nombreElementPage  && nombreElementPage * pageActuelle +  i < tabptrVignette.size(); i++ )
+                {
+                    tabptrVignette[nombreElementPage * pageActuelle + i ].afficher();
+                }
+
+                pageSuivante.afficher();
+                pagePrecedente.afficher();
+                retour.afficher();
+                fenetrePrincipale.display();
+
+        }
+
+
+    }
+
+    return "errStr";
+
+}
 
 
 
@@ -738,13 +897,14 @@ void Jeu::InitNombreObjectif()
 }
 
 
-void Jeu::rechercheFichier(std:: string chemin, std::string extension)
+std::vector<std::string> Jeu::rechercheFichier(std:: string chemin, std::string extension)
 {
     string  commandeSysteme;
+    std::vector<std::string> stringVector;
     if(chemin == "" || chemin.size() > 300  )
     {
         std::cerr<<"Chemin d'acces incorrecte!"<<std::endl;
-        return;
+        return stringVector;
     }
     else
     {
@@ -770,7 +930,7 @@ void Jeu::rechercheFichier(std:: string chemin, std::string extension)
         while(std::getline(fichier,s))
             {
 
-                m_tabCartes.push_back(s);
+                stringVector.push_back(s);
                //std::cout<<m_tabCartes[i]<<std::endl;
                i++;
             }
@@ -793,5 +953,5 @@ void Jeu::rechercheFichier(std:: string chemin, std::string extension)
 
 
     system(commandeSysteme.c_str());
-
+    return stringVector;
 }
