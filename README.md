@@ -9,3 +9,6 @@ pour LimbEditor , reconstituer comme suit:
 LimbEditor/Data
 LimbEditor/LimbEditor.exe
 LimbEditor/*.dll    (sfml et LimbGUI)
+
+Utilisation du Makefile:
+N'oubliez pas de rétablir les chemin INC = et LIB = du Makefile. LimbGui est sur le Github aussi!
