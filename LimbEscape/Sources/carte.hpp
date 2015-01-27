@@ -20,15 +20,14 @@ private:
 
     std::vector<Type_element> m_tabElement;
     std::vector<Element*> m_ElementHolder;
-    RessourceHolder *rholder;
+    //RessourceHolder *m_rholder;
 
 public:
 
-    void creationBase();
-    void creerElement(RessourceHolder &rholder);
+    void creationBase(RessourceHolder *rholder);
+    void assembler(RessourceHolder *rholder);
 
-    Carte();
-    Carte(std::string nom,int taille);
+      Carte();
     ~Carte();
 
     bool charger(std::string const &nom);

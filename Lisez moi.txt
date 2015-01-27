@@ -14,3 +14,24 @@ Souris pour clique sur bouton...
 LimbEditor:
 Les touches directionnelles pour deplacer la vue
 souris pour cliquer sur les boutons/selectionner et deposer element.
+
+
+Créer des suites pour LimbEscape:
+
+1)Créer un fichier txt du nom de votre choix et changé son extension par .ste
+2)Ouvrir ledit fichier avec un blocnote ou notepad++
+3)Marquer une carte par ligne, dans l'ordre de votre choix sans .map 
+
+exemple:
+
+Pour créer une suite nommé masuite.
+
+je crée le fichier masuite.ste dans le Cartes/Suites/
+je l'ouvre avec un bloc note,
+Enfin je note le nom des carte dès le début du fichier sans espace:
+
+Carte1
+Carte3
+Carte2...
+
+Il peut être utile de s'aider de Default.ste present dans Cartes/Suites/ afin de comprendre comment faire.

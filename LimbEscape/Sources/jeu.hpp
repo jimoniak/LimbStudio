@@ -16,9 +16,14 @@ private:
 
     sf::RectangleShape fond;
 
+    sf::Texture m_texlimbEscape;
+    sf::Sprite m_limbEscape;
+    sf::Image  m_icone;
 
     std::vector<unsigned int> m_repereObjectif;
     std::vector<std::string> m_tabCartes;
+    std::vector<std::string> m_tabSuites;
+
     int m_objectifRestant;
     std::vector<std::vector<Element*>> m_tabElement;
 
@@ -44,6 +49,12 @@ private:
    sf::Clock m_horlogeInterne;
    sf::Clock m_horlogeEvent;
    sf::Clock m_chronometre;
+
+   //Son
+    sf::SoundBuffer m_clickbuffer;
+    sf::Sound m_click;
+
+    sf::Music m_theme;
 
 public:
 

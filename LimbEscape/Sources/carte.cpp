@@ -30,23 +30,44 @@ depot officiel : https://github.com/jimoniak/LimbEscape
 
 using namespace std;
 
-void Carte::creationBase()
+void Carte::creationBase(RessourceHolder *rholder)
 {
     sf::Image   m_imageCarte;
     sf::Image   m_imageTile;
+    sf::Image  m_TileBasD;
+    sf::Image m_TileBasG;
 
-    if(!m_imageTile.loadFromFile("Data/Default/Tiles/Tile.png"))    std::cout<<"Impossible d'ouvrir Tile.png"<<std::endl;
-
-    m_imageCarte.create (m_tailleCote * LARGEUR_TILE, m_tailleCote * HAUTEUR_TILE); //creation du support en memoire où blitter les tiles.
+   // if(!m_imageTile.loadFromFile("Data/RessourcesPack/"+ m_packRessource + "/Tile.png"))    std::cout<<"Impossible d'ouvrir Tile.png"<<std::endl;
+    m_imageTile = rholder->getTextureElem(RIEN).copyToImage();
+    m_TileBasG = rholder->getTextureElem(5).copyToImage();
+    m_TileBasD = rholder->getTextureElem(6).copyToImage();
+    m_imageCarte.create ((m_tailleCote+1) * LARGEUR_TILE, (m_tailleCote+1) * HAUTEUR_TILE); //creation du support en memoire où blitter les tiles.
     m_imageCarte.createMaskFromColor(sf::Color::Black);
 
+  /*  for(unsigned int i = 0 ; i< m_tailleCote;i++)
+    {
+        unsigned int j = m_tailleCote - 1 ;
+        m_imageCarte.copy(m_TileBasG, (DEMI_LTILE * i - DEMI_LTILE* (j+1)) + ((LARGEUR_TILE * m_tailleCote ) / 2) - DEMI_LTILE  ,DEMI_HTILE * i + DEMI_HTILE * (j+1),sf::IntRect(0, 0, 0, 0),true);
+
+    }
+
+     for(unsigned int j = 0 ; j< m_tailleCote;j++)
+    {
+        unsigned int i = m_tailleCote - 1 ;
+        m_imageCarte.copy(m_TileBasD, (DEMI_LTILE * (i+1) - DEMI_LTILE* j) + ((LARGEUR_TILE * m_tailleCote ) / 2) - DEMI_LTILE  ,DEMI_HTILE * (i+1) + DEMI_HTILE * j,sf::IntRect(0, 0, 0, 0),true);
+    }*/
 
     for(unsigned int j=0; j<m_tailleCote; j++)
     {
         for(unsigned int i=0; i<m_tailleCote; i++)
         {
             m_imageCarte.copy(m_imageTile, (DEMI_LTILE * i - DEMI_LTILE* j) + ((LARGEUR_TILE * m_tailleCote ) / 2) - DEMI_LTILE  ,DEMI_HTILE * i + DEMI_HTILE * j,sf::IntRect(0, 0, 0, 0),true); //Copie des tiles sur le support,
+            if(j == m_tailleCote - 1 ) m_imageCarte.copy(m_TileBasG, (DEMI_LTILE * i - DEMI_LTILE* (j+1)) + ((LARGEUR_TILE * m_tailleCote ) / 2) - DEMI_LTILE  ,DEMI_HTILE * i + DEMI_HTILE * (j+1),sf::IntRect(0, 0, 0, 0),true);
+             if(i == m_tailleCote - 1 ) m_imageCarte.copy(m_TileBasD, (DEMI_LTILE * (i+1) - DEMI_LTILE* j) + ((LARGEUR_TILE * m_tailleCote ) / 2) - DEMI_LTILE  ,DEMI_HTILE * (i+1) + DEMI_HTILE * j,sf::IntRect(0, 0, 0, 0),true);
         }
+
+
+
     }
 
     m_textureBase = new sf::Texture();
@@ -62,8 +83,9 @@ void Carte::creationBase()
 
 }
 
-void Carte::creerElement(RessourceHolder &rholder)
+void Carte::assembler(RessourceHolder *rholder)
 {
+    creationBase(rholder);
     m_ElementHolder.clear();
     for(unsigned int i= 0 ; i<m_tailleCote; i++)
     {
@@ -72,16 +94,16 @@ void Carte::creerElement(RessourceHolder &rholder)
             switch(m_tabElement[m_tailleCote*j + i ])
             {
             case CAISSE:
-                m_ElementHolder.push_back(new Caisse(sf::Vector2f(i,j),&rholder));
+                m_ElementHolder.push_back(new Caisse(sf::Vector2f(i,j),rholder));
                 break;
             case MUR:
-                m_ElementHolder.push_back(new Mur(sf::Vector2f(i,j),&rholder));
+                m_ElementHolder.push_back(new Mur(sf::Vector2f(i,j),rholder));
                 break;
             case OBJECTIF:
-                m_ElementHolder.push_back(new Objectif(sf::Vector2f(i,j),&rholder));
+                m_ElementHolder.push_back(new Objectif(sf::Vector2f(i,j),rholder));
                 break;
             case DEPART:
-                m_ElementHolder.push_back(new Depart(sf::Vector2f(i,j),&rholder));
+                m_ElementHolder.push_back(new Depart(sf::Vector2f(i,j),rholder));
                 break;
             case RIEN:
                 break;
@@ -108,42 +130,18 @@ Carte::Carte()
 }
 
 
-Carte::Carte(std::string nom,int taille)
-{
-    m_nom = nom;
-    m_tailleCote = taille;
-
-
-
-    for(unsigned int i = 0; i<m_tailleCote *m_tailleCote; i++)
-
-    {
-
-        m_tabElement.push_back(RIEN);
-    }
-
-
-    m_packRessource = "Default";
-    m_ElementHolder.clear();
-
-    creationBase();
-
-}
-
-
-
 
 
 
 Carte::~Carte()
 {
-    for(unsigned int i; i< m_ElementHolder.size(); i++)
+    for(unsigned int i=0; i< m_ElementHolder.size(); i++)
     {
       m_ElementHolder[i] = nullptr;
     }
 
     m_ElementHolder.clear();
-    rholder =nullptr;
+   // rholder =nullptr;
 
     if(m_textureBase != nullptr) delete m_textureBase;
     if(m_base !=nullptr)           delete m_base;
@@ -201,14 +199,15 @@ bool Carte::charger(std::string const &nom)
             }
             cout<<"nom de la carte: " <<m_nom<<endl;
             cout<<"nom du pack de ressource: "<<m_packRessource<<endl;
+
+
+           // rholder = new RessourceHolder(m_packRessource);
             chargement.close();
           //  return true;
 
         }
     }
 
-
-    creationBase();
     return true;
 }
 

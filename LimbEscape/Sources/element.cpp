@@ -173,7 +173,7 @@ Depart::Depart(sf::Vector2f position,RessourceHolder *rholder)
 }
 Depart::~Depart()
 {
-std::cout<<"destruction du depart "<<std::endl;
+//std::cout<<"destruction du depart "<<std::endl;
 
 }
 

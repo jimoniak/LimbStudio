@@ -1,0 +1,7 @@
+Pour les personnes voulant compiler le programme.
+
+Celui-ci dépends de 2 librairies:
+
+SFML 2.1 et LimbGUI (disponible sur https://github.com/jimoniak/LimbStudio/tree/master/LimbGUI )
+
+N'oublier pas de rétablir les liens dans le makefile pour le linker! 

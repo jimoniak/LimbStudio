@@ -31,7 +31,7 @@ GestionSouris::GestionSouris(sf::RenderWindow *fenetre)
     pfenetrePrincipale = fenetre;
     //pcarte = carte;
 
-    if(!m_overlaySouris.loadFromFile("Data/Tiles/MouseOverlay.png")) {
+    if(!m_overlaySouris.loadFromFile("Data/Overlay/MouseOverlay.png")) {
         std::cout<< "Erreur avec MouseOverlay.png"<<std::endl;
     }
 
@@ -83,7 +83,7 @@ sf::Vector2f GestionSouris::getCoordSouris()
 Selecteur::Selecteur()
 {
 
-    if(!Selection.loadFromFile("Data/Tiles/TileSelection.png")) {
+    if(!Selection.loadFromFile("Data/Overlay/TileSelection.png")) {
         std::cout<<"Impossible d'ouvrir TileSelection.png" <<std::endl;
     }
 

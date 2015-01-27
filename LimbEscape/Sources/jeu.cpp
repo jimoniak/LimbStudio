@@ -47,12 +47,24 @@ Jeu::Jeu() :fenetrePrincipale(sf::VideoMode(LFENETRE, HFENETRE), "LimbEscape"),
     gestionSouris(&fenetrePrincipale)
 {
     view1.zoom(1.2);
-    if (!font.loadFromFile("Data/Fonts/Timeless.ttf")) {
-        std::cout<<"erreur avec Timeless.ttf"<<std::endl;
+    if (!font.loadFromFile("Data/Fonts/upheavtt.ttf")) {
+        std::cout<<"erreur avec la police upheavtt.ttf"<<std::endl;
     }
+
+    if(!m_icone.loadFromFile("Data/icone.png")) std::cerr<<"impossible de charger icone.png"<<std::endl;
+
+    fenetrePrincipale.setIcon(16,16,m_icone.getPixelsPtr());
 
      fond.setSize(sf::Vector2f(LFENETRE,HFENETRE));
      fond.setFillColor(sf::Color(125,125,200));
+
+
+     m_texlimbEscape.loadFromFile("Data/LimbEscape.png");
+     m_limbEscape.setTexture(m_texlimbEscape);
+
+
+    m_limbEscape.setScale(0.8,0.8);
+    m_limbEscape.setPosition(LFENETRE / 2  - (m_texlimbEscape.getSize().x/2   * 0.8)  , 0);
 
     if(!textBoutonR.loadFromFile("Data/GUI/boutonf.png")) std::cout<<"Erreur avec texture boutonf.png"<<std::endl;
     if(!textBoutonV.loadFromFile("Data/GUI/boutond.png")) std::cout<<"Erreur avec texture boutond.png"<<std::endl;
@@ -77,13 +89,20 @@ Jeu::Jeu() :fenetrePrincipale(sf::VideoMode(LFENETRE, HFENETRE), "LimbEscape"),
 
        fenetrePrincipale.setVerticalSyncEnabled(true);
        m_tabCartes = rechercheFichier("Cartes\\",".map");
-       m_suiteCarte = rechercheFichier("Cartes\\Suites\\",".ste");
+       m_tabSuites = rechercheFichier("Cartes\\Suites\\",".ste");
 
        m_ptrthis = this;
        m_jouerSuite= false;
        m_comptSuite = 0;
 
+         if (!m_clickbuffer.loadFromFile("Data/Sounds/Clicks/click.wav")) cerr<<"Impossible de charger click.wav"<<endl;
+         m_click.setBuffer(m_clickbuffer);
+
+          if(!m_theme.openFromFile("Data/Sounds/Musics/Main.ogg"))
+            std::cerr<< "erreur musique!"<<std::endl;
+
 }
+
 
 Jeu::~Jeu()
 {
@@ -122,13 +141,29 @@ int Jeu::gagner()
     float tempsEcoule = m_chronometre.getElapsedTime().asSeconds();
     std::string s = utils::ConvertionFltString(tempsEcoule);
 
-
-     if(s.size() >5) s.resize(5);
+    if(s.size() >5) s.resize(5);
     sf::Text temps;
     temps.setFont(font);
     temps.setCharacterSize(18);
     temps.setColor(sf::Color::Blue);
+    if(tempsEcoule < 60)
+    {
+    std::string s = utils::ConvertionFltString(tempsEcoule);
+    if(s.size() >5) s.resize(5);
     temps.setString(L"Terminé en : " + s + " secondes ! ");
+    }
+    else
+    {
+        int minute = tempsEcoule / 60 ;
+        float seconde = tempsEcoule - minute* 60 ;
+        std:: string m;
+        m = utils::ConvertionFltString(minute);
+        s=utils::ConvertionFltString(seconde);
+        if(s.size() >5) s.resize(5);
+
+         temps.setString(L"Terminé en : " + m + " minute(s)  et  " + s + "secondes ! ");
+
+    }
     temps.setPosition(LFENETRE/2 - temps.getLocalBounds().width / 2 , HFENETRE / 2 - 150);
 
 
@@ -159,6 +194,7 @@ int Jeu::gagner()
 
             if(suite.actionner())
             {
+                m_click.play();
                  if(m_jouerSuite) {
                         m_comptSuite++;
                         if(m_comptSuite<m_suiteCarte.size()){
@@ -185,6 +221,7 @@ int Jeu::gagner()
         fenetrePrincipale.clear();
         fenetrePrincipale.draw(fond);
         fenetrePrincipale.draw(temps);
+        fenetrePrincipale.draw(m_limbEscape);
         suite.afficher();
         fenetrePrincipale.display();
 
@@ -195,7 +232,23 @@ int Jeu::gagner()
 
 void Jeu::menuPrincipal()
 {
+
     fenetrePrincipale.setKeyRepeatEnabled(false);
+
+    sf::RectangleShape fondCredit;
+    fondCredit.setFillColor(sf::Color(30,56,65,125));
+    fondCredit.setSize(sf::Vector2f(LFENETRE / 2,HFENETRE/2));
+    fondCredit.setPosition(LFENETRE/2 - fondCredit.getSize().x/2,HFENETRE/2 - fondCredit.getSize().y/2);
+
+    sf::Text apropos;
+    std::string version = VERSION;
+
+    apropos.setFont(font);
+    apropos.setCharacterSize(16);
+    apropos.setColor(sf::Color::White);
+
+    apropos.setString(L"Crédit : \n \n \n Limbescape réalisé par Jimmy PEAULT pour LimbStudio \n Limbescape est un projet OpenSource sous Licence:  \n CeCILL 2.1 \n\n\n\n" + version);
+    apropos.setPosition(fondCredit.getPosition().x + fondCredit.getSize().x / 2 - apropos.getGlobalBounds().width / 2 , fondCredit.getPosition().y + fondCredit.getSize().y / 2 - apropos.getGlobalBounds().height / 2);
 
     lgui::Bouton jouer(font,&textBoutonR,&textBoutonV);  lgui::Bouton quitter(font,&textBoutonR,&textBoutonV);
     jouer.setTitre("Jouer");                                               quitter.setTitre("Quitter");
@@ -205,6 +258,10 @@ void Jeu::menuPrincipal()
      lgui::Bouton retour(font,&textBoutonR,&textBoutonV);
      retour.setTitre("Retour");
      retour.setTailleTexte(15);
+
+      lgui::Bouton credit(font,&textBoutonR,&textBoutonV);
+     credit.setTitre("Credit");
+     credit.setTailleTexte(15);
 
     lgui::Bouton esbrouffe(font,&textBoutonR,&textBoutonV);
      esbrouffe.setTitre("Esbrouffe");
@@ -232,15 +289,18 @@ void Jeu::menuPrincipal()
      aleatoire.setTailleTexte(15);
 
 
-    jouer.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2 ,HFENETRE /2 - 100));
-    esbrouffe.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2 ,HFENETRE /2 + 100 ));
-    suite.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2  ,HFENETRE /2 - 100 ));
-    choisirSuite.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2  ,HFENETRE /2  + 50 ));
-    classique.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2  ,HFENETRE /2 - 100 ));
-    quitter.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x /2,HFENETRE /2+100));
-    charger.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x /2  ,HFENETRE /2+100));
-    aleatoire.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x /2  ,HFENETRE /2-100));
+
+
+    jouer.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2 ,HFENETRE /2 - 50));
+    esbrouffe.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2 ,HFENETRE /2 + 150 ));
+    suite.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2  ,HFENETRE /2 - 50 ));
+    choisirSuite.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2 ,HFENETRE /2 + 150 ));
+    classique.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2  ,HFENETRE /2 - 50 ));
+    quitter.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x /2,HFENETRE /2+150));
+    charger.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x / 2 ,HFENETRE /2 + 150 ));
+    aleatoire.setPosition(sf::Vector2f(LFENETRE / 2 - textBoutonV.getSize().x /2  ,HFENETRE /2-50));
     retour.setPosition(sf::Vector2f(LFENETRE  - textBoutonV.getSize().x  - 30  ,HFENETRE -100));
+    credit.setPosition(sf::Vector2f(LFENETRE  - textBoutonV.getSize().x  - 30  ,HFENETRE -100));
 
     jouer.setFenetrelie(fenetrePrincipale);
     esbrouffe.setFenetrelie(fenetrePrincipale);
@@ -252,6 +312,7 @@ void Jeu::menuPrincipal()
     quitter.setFenetrelie(fenetrePrincipale);
 
     retour.setFenetrelie(fenetrePrincipale);
+    credit.setFenetrelie(fenetrePrincipale);
 
     sf::Event event;
 
@@ -264,33 +325,47 @@ void Jeu::menuPrincipal()
         }
 
 
-        if(m_horlogeEvent.getElapsedTime().asSeconds() > 0.1) // protection  afin d'eviter d'appuyer sur  deux bouton qui se superpose sur deux page connexes.
+        if(m_horlogeEvent.getElapsedTime().asSeconds() > 0.1) // protection  afin d'eviter d'appuyer sur  deux boutons qui se superpose sur deux page connexes.
         {
         switch(m_pageMenu)
         {
             case 0:
         if(jouer.actionner()) {
+            m_click.play();
             m_pageMenu++;
             m_horlogeEvent.restart();
 
         }
+
+        if(credit.actionner())
+        {
+            m_click.play();
+            m_pageMenu = 4;
+            m_horlogeEvent.restart();
+
+
+        }
         if(quitter.actionner()) {
+                m_click.play();
                 return;
 
         }
         break;
         case 1:
         if(esbrouffe.actionner()) {
+            m_click.play();
             m_pageMenu++;
             m_horlogeEvent.restart();
 
         }
          if(suite.actionner()) {
+            m_click.play();
             m_pageMenu=3;
             m_horlogeEvent.restart();
 
         }
         if(retour.actionner()) {
+        m_click.play();
         m_pageMenu--;
         m_horlogeEvent.restart();
         }
@@ -298,7 +373,7 @@ void Jeu::menuPrincipal()
             case 2:
             if(aleatoire.actionner())
             {
-
+                m_click.play();
                 int randnb;
                 string carte;
                 randnb= Randomizer::Random( 0, m_tabCartes.size()-1); //-1 est une sécurité pour pas sortir du tableau
@@ -313,7 +388,7 @@ void Jeu::menuPrincipal()
             }
             if(charger.actionner())
             {
-
+            m_click.play();
             std::string nom;
             //nom =  saisieNom.getTexte() ;
             nom = menuVignette(m_tabCartes);
@@ -324,6 +399,7 @@ void Jeu::menuPrincipal()
             }
              if(retour.actionner())
             {
+            m_click.play();
             m_pageMenu--;
             m_horlogeEvent.restart();
             }
@@ -332,26 +408,37 @@ void Jeu::menuPrincipal()
 
             case 3:
                         if(retour.actionner()) {
+                        m_click.play();
                         m_pageMenu =1;
                         m_horlogeEvent.restart();
                         }
 
                          if(classique.actionner()) {
+                         m_click.play();
                          chargerSuite("Default");
                          Jeu::jouer();
                          m_horlogeEvent.restart();
                         }
 
                          if(choisirSuite.actionner()) {
-                             std::string nomSuite;
-                         nomSuite= menuVignette(m_suiteCarte);
-                         if(nomSuite != "errStr") Jeu::jouer();
-                         else std::cout<<"erreur avec le nom d'une suite!"<<std::endl;
+                         m_click.play();
+                         std::string nomSuite;
+                         nomSuite= menuVignette(m_tabSuites);
+                         if(nomSuite != "errStr" && chargerSuite(nomSuite) ) Jeu::jouer();
+                         else std::cout<<"La fonction chargerSuite à retournee errStr"<<std::endl;
                          m_horlogeEvent.restart();
 
 
                         }
                 break;
+            case 4:
+                if(retour.actionner()) {
+                        m_click.play();
+                        m_pageMenu =0;
+                        m_horlogeEvent.restart();
+                        }
+                    break;
+
         }
 
 
@@ -362,11 +449,13 @@ void Jeu::menuPrincipal()
         fenetrePrincipale.clear();
 
         fenetrePrincipale.draw(fond);
+        fenetrePrincipale.draw(m_limbEscape);
 
         if(m_pageMenu==0)
         {
         jouer.afficher();//
         quitter.afficher();//
+        credit.afficher();
         }
         if(m_pageMenu==1)
         {
@@ -388,6 +477,13 @@ void Jeu::menuPrincipal()
              choisirSuite.afficher();
              retour.afficher();
         }
+        else if(m_pageMenu == 4)
+        {
+
+            fenetrePrincipale.draw(fondCredit);
+            fenetrePrincipale.draw(apropos);
+            retour.afficher();
+        }
         fenetrePrincipale.display();
         }
     }
@@ -396,11 +492,15 @@ void Jeu::menuPrincipal()
 std::string Jeu::menuVignette(std::vector<std::string> const &liste)
 {
 
+
+    sf::RectangleShape fondVignette;
+
+
      lgui::Bouton pageSuivante(font,&textBoutonR,&textBoutonV);
        pageSuivante.setTitre("->");
        pageSuivante.setTailleTexte(15);
        pageSuivante.setFenetrelie(fenetrePrincipale);
-       pageSuivante.setPosition(sf::Vector2f(LFENETRE * 0.85 -  textBoutonR.getSize().x ,HFENETRE - 0.12 * HFENETRE));
+       pageSuivante.setPosition(sf::Vector2f(LFENETRE  -  (textBoutonR.getSize().x + 20),HFENETRE - 0.12 * HFENETRE));
 
        lgui::Bouton pagePrecedente(font,&textBoutonR,&textBoutonV);
        pagePrecedente.setTitre("<-");
@@ -412,7 +512,7 @@ std::string Jeu::menuVignette(std::vector<std::string> const &liste)
        retour.setTitre("Retour");
        retour.setTailleTexte(15);
        retour.setFenetrelie(fenetrePrincipale);
-       retour.setPosition(sf::Vector2f( LFENETRE / 2 - (0.1* LFENETRE+ textBoutonR.getSize().x) / 2, HFENETRE - 0.12 * HFENETRE));
+       retour.setPosition(sf::Vector2f( LFENETRE / 2 -  textBoutonR.getSize().x /2 , HFENETRE - 0.12 * HFENETRE));
 
        sf::Texture vignette;
        vignette.loadFromFile("Data/GUI/vignette.png");
@@ -428,6 +528,14 @@ std::string Jeu::menuVignette(std::vector<std::string> const &liste)
 
     unsigned int nbPage = liste.size() / nombreElementPage;
     unsigned int pageActuelle = 0;
+    int offset =( LFENETRE - ((nombreElementRange - 1 )  * (0.2 * LFENETRE) + 50)) / 2 ;
+    int tailleFondX = (((nombreElementRange - 1 )  * (0.2 * LFENETRE) )) + 90;
+    int tailleFondY = (((nombreRange - 1)* (0.2*HFENETRE) + 120))  ;
+
+    fondVignette.setSize(sf::Vector2f(tailleFondX,tailleFondY));
+    fondVignette.setFillColor(sf::Color(30,56,65));
+    fondVignette.setPosition(offset - 20 ,(m_texlimbEscape.getSize().y * 0.8 + 0.05 * HFENETRE) - 20);
+
 
     for(unsigned int i = 0 ; i< liste.size();i++)
     {
@@ -446,10 +554,10 @@ std::string Jeu::menuVignette(std::vector<std::string> const &liste)
     {
            for(unsigned int j = 0 ; j < nombreRange && i * nombreElementPage + j * nombreElementRange < liste.size() ; j ++) // 3 rangés par page
            {
-               positionVignette.y = 0.15* HFENETRE + j* HFENETRE * 0.20;
+               positionVignette.y = m_texlimbEscape.getSize().y * 0.8 + 0.05 * HFENETRE + j* HFENETRE * 0.20;
                for(unsigned int k = 0 ; k< nombreElementRange &&i * nombreElementPage + j * nombreElementRange + k < liste.size();k++) // 4 elements par rangé
                {
-                   positionVignette.x = 0.1 * LFENETRE + k * LFENETRE * 0.20;
+                   positionVignette.x = offset + k * LFENETRE * 0.20;
 
                    tabptrVignette[i*nombreElementPage + j*nombreElementRange + k].setPosition(positionVignette);
 
@@ -471,6 +579,7 @@ std::string Jeu::menuVignette(std::vector<std::string> const &liste)
                 {
                         if(pageSuivante.actionner())
                         {
+                            m_click.play();
                             if(pageActuelle<nbPage)
                             pageActuelle++;
                             m_horlogeEvent.restart();
@@ -478,6 +587,7 @@ std::string Jeu::menuVignette(std::vector<std::string> const &liste)
 
                         if(pagePrecedente.actionner())
                         {
+                            m_click.play();
                             if(pageActuelle>0)
                             pageActuelle--;
                             m_horlogeEvent.restart();
@@ -486,6 +596,7 @@ std::string Jeu::menuVignette(std::vector<std::string> const &liste)
 
                         if(retour.actionner())
                         {
+                            m_click.play();
                             return "errStr" ;
                             m_horlogeEvent.restart();
 
@@ -509,6 +620,8 @@ std::string Jeu::menuVignette(std::vector<std::string> const &liste)
                 fenetrePrincipale.setView(fenetrePrincipale.getDefaultView());
                 fenetrePrincipale.clear();
                 fenetrePrincipale.draw(fond);
+                fenetrePrincipale.draw(m_limbEscape);
+                fenetrePrincipale.draw(fondVignette);
 
                 for(unsigned i = 0 ; i<nombreElementPage  && nombreElementPage * pageActuelle +  i < tabptrVignette.size(); i++ )
                 {
@@ -572,13 +685,15 @@ void Jeu::jouer()
 
         if( objectifRempli() && !m_joueur->enDeplacement()){  if(gagner()) {desallouer();return;}}
 
-        if(horlogeEvent.getElapsedTime().asMilliseconds() - tempsBoucleEvent.asMilliseconds()>10) {
+       // if(horlogeEvent.getElapsedTime().asMilliseconds() - tempsBoucleEvent.asMilliseconds()>10) {
+
            m_joueur->gererClavier(*m_ptrthis);
             tempsBoucleEvent = horlogeEvent.getElapsedTime();
-        }
+      //  }
 
         if(recharger.actionner())
         {
+            m_click.play();
             std::string nomcarte;
             nomcarte = m_carte->getNom();
                 desallouer();
@@ -586,7 +701,9 @@ void Jeu::jouer()
         }
         if(retour.actionner())
         {
+            m_click.play();
              desallouer();
+             m_jouerSuite = false;
             return;
         }
 
@@ -617,12 +734,18 @@ void Jeu::jouer()
                 {
                     if(m_tabElement[y][x]->getType() != DEPART)
                     fenetrePrincipale.draw(m_tabElement[y][x]->getApparence());
+
+
+                }
+                else
+                {
+                    if(m_joueur->getPosition().x == x  && m_joueur->getPosition().y == y)  m_joueur->afficher(fenetrePrincipale);
                 }
             }
 
         }
 
-        m_joueur->afficher(fenetrePrincipale);
+
 
 
         fenetrePrincipale.setView(fenetrePrincipale.getDefaultView());//Changement de vue pour dessiner l'interface.
@@ -708,7 +831,7 @@ bool Jeu::chargerCarte(std::string const &nom)
    {
 
     m_ressourceHolder= new RessourceHolder(m_carte->getPackRessource()); // On en crée un nouveau avec le pack de ressource de la carte.
-    m_carte->creerElement(*m_ressourceHolder); // et on le refait pour la carte actuelle.
+    m_carte->assembler(m_ressourceHolder); // et on le refait pour la carte actuelle.
     trierElement(); // Enfin on tri les elements  dans un vector de jeu:: en enlevant le Depart et les objectif (pour l'affichage)
     m_joueur = new Joueur(fenetrePrincipale,m_carte);
 
@@ -762,18 +885,21 @@ std::vector<std::vector<Element*>> Jeu::getTabElement()
 
 void Jeu::intro()
 {
+
+    m_theme.play();//musique
+    m_theme.setLoop(true);//en boucle
     sf::Text TextPasse;
 
     TextPasse.setFont(font);
     TextPasse.setCharacterSize(15);                      //texte qui indique la commande à utiliser pour passer
-    TextPasse.setColor(Color::White);
+    TextPasse.setColor(sf:: Color::Green);
     TextPasse.setPosition(20,HFENETRE -50);
     TextPasse.setString("Appuyer sur E pour passer...");
     sf::Event event;
 
     sf::Texture textureLimb;               //Logo Limb'Studio
     sf::Texture textureSfml;
-    if(!textureLimb.loadFromFile("Data/LimbStudio.png")) cout<< "Logo non chargé!" <<endl;
+    if(!textureLimb.loadFromFile("Data/LimbStudio.png")) cout<< "Logo setLoopnon chargé!" <<endl;
     if(!textureSfml.loadFromFile("Data/sfml.png")) cout<< "Logo non chargé!" <<endl;
     textureLimb.setSmooth(true);
 
@@ -801,7 +927,8 @@ void Jeu::intro()
             sfmlSp.setColor(sf::Color(255,255,255,  255 - (((temps.getElapsedTime().asSeconds() - (tempsDep.asSeconds() + 3)) * 255)))); //on fait disparaitre le logo
         }
 
-        TextPasse.setColor(Color(255,255,255, 128*(1+sin(4 * temps.getElapsedTime().asSeconds())))); //on change la transparence du texte de commande selon un sinus
+       // TextPasse.setColor(Color(255,255,255, 128*(1+sin(4 * temps.getElapsedTime().asSeconds())))); //on change la transparence du texte de commande selon un sinus
+        TextPasse.setColor(utils::changerTransparence(TextPasse.getColor(),128*(1+sin(4 * temps.getElapsedTime().asSeconds())))); //on change la transparence du texte de commande selon un sinus
         if(temps.getElapsedTime().asSeconds() - tempsatt > 0.01) {
             fenetrePrincipale.clear();
             fenetrePrincipale.draw(sfmlSp);
@@ -837,7 +964,8 @@ void Jeu::intro()
             LimbSp.setColor(sf::Color(255,255,255,  255 - (((temps.getElapsedTime().asSeconds() - (tempsDep.asSeconds() + 4)) * 255))));
         }
 
-        TextPasse.setColor(Color(255,255,255, 128*(1+sin(4 * temps.getElapsedTime().asSeconds()))));
+       // TextPasse.setColor(Color(255,255,255, 128*(1+sin(4 * temps.getElapsedTime().asSeconds()))));
+         TextPasse.setColor(utils::changerTransparence(TextPasse.getColor(),128*(1+sin(4 * temps.getElapsedTime().asSeconds()))));
         if(temps.getElapsedTime().asSeconds() - tempsatt > 0.01) {
             fenetrePrincipale.clear();
             fenetrePrincipale.draw(LimbSp);

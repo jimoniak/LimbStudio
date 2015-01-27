@@ -35,6 +35,14 @@ std::string  ConvertionFltString(float nombre )
 
 }
 
+sf::Color changerTransparence(sf::Color Couleur, int Transparence)
+{
+    return sf::Color(Couleur.r,Couleur.g,Couleur.b,Transparence);
+
+
+
+}
+
 
 }
 

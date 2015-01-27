@@ -16,6 +16,7 @@ private:
     sf::Vector2u m_tailleTexture;
     int frame;
     int m_coteCarte;
+    bool verouillageClavier;
 
     Carte *m_carte;
     sf::RenderWindow *m_fenetre;
@@ -37,7 +38,7 @@ public:
     Joueur(const Joueur&);
     ~Joueur();
 
-
+    sf::Vector2f getPosition();
     //methodes utiles
 
     bool chargementTexture();

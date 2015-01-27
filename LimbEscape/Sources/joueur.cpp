@@ -36,6 +36,7 @@ Joueur::Joueur(sf::RenderWindow &fenetre,Carte* carte)
     m_carte = carte;
     m_coteCarte = m_carte->getTaille();
     m_position = sf::Vector2f(0,0);
+    verouillageClavier =false;
 
     m_direction = 0;
     m_enDeplacement = false;
@@ -71,6 +72,11 @@ Joueur::~Joueur()
 
 }
 
+sf::Vector2f Joueur::getPosition()
+{
+    return m_position;
+}
+
 bool Joueur::chargementTexture()
 {
     if(!m_apparence.loadFromFile("Data/Player/GabaritPersonnage.png"))
@@ -88,10 +94,11 @@ bool Joueur::chargementTexture()
 
 void Joueur::gererClavier(Jeu &jeu)
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) deplacer(1,jeu); //HAUT
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) deplacer(2,jeu);//DROITE
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) deplacer(3,jeu);//BAS
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) deplacer(4,jeu);//GAUCHE
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z) ) {deplacer(1,jeu);}//HAUT
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) ) {deplacer(2,jeu);}//DROITE
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) ) {deplacer(3,jeu);}//BAS
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) ) {deplacer(4,jeu);}//GAUCHE
 
 }
 
@@ -195,25 +202,21 @@ void Joueur::deplacer(int direction,Jeu &jeu)
 
 void Joueur::animer()
 {
+
     if(m_enDeplacement)
     {
 
-
-        if(m_horlogeAnimation.getElapsedTime().asMilliseconds() -m_tempsAnimation.asMilliseconds()> 30)
+        if(m_horlogeAnimation.getElapsedTime().asMilliseconds() -m_tempsAnimation.asMilliseconds()> 10)
         {
 
             m_sprite.setPosition( m_positionDepartAnimation.x +  (m_deplacement.x * ( m_tempsAnimation.asMilliseconds() / (float)TEMPSANIMATION) )   , m_positionDepartAnimation.y+ (m_deplacement.y * ( m_tempsAnimation.asMilliseconds() / (float)TEMPSANIMATION)) );
             m_tempsAnimation +=  m_horlogeAnimation.getElapsedTime() - m_tempsAnimation;
 
-            if(m_direction ==1)
-            {
-
-
                 if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 )
                 {
                     if(frame != 1)
                     {
-                        m_sprite.setTextureRect(sf::IntRect(0,0,m_tailleTexture.x /4 , m_tailleTexture.y /4));
+                        m_sprite.setTextureRect(sf::IntRect(0, (m_direction-1) * m_tailleTexture.y/4 ,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 1;
                     }
                 }
@@ -222,7 +225,7 @@ void Joueur::animer()
                 {
                     if(frame != 2)
                     {
-                        m_sprite.setTextureRect(sf::IntRect(m_tailleTexture.x / 4,0,m_tailleTexture.x /4 , m_tailleTexture.y /4));
+                        m_sprite.setTextureRect(sf::IntRect(m_tailleTexture.x / 4,(m_direction-1) * m_tailleTexture.y/4 ,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 2;
                     }
                 }
@@ -231,7 +234,7 @@ void Joueur::animer()
                 {
                     if(frame != 3)
                     {
-                        m_sprite.setTextureRect(sf::IntRect(2*m_tailleTexture.x/4,0,m_tailleTexture.x /4 , m_tailleTexture.y /4));
+                        m_sprite.setTextureRect(sf::IntRect(2*m_tailleTexture.x/4,(m_direction-1) * m_tailleTexture.y/4 ,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 3;
                     }
                 }
@@ -240,7 +243,7 @@ void Joueur::animer()
                 {
                     if(frame != 4)
                     {
-                        m_sprite.setTextureRect(sf::IntRect(3*m_tailleTexture.x/4,0,m_tailleTexture.x /4 , m_tailleTexture.y /4));
+                        m_sprite.setTextureRect(sf::IntRect(3*m_tailleTexture.x/4,(m_direction-1) * m_tailleTexture.y/4 ,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 4;
                     }
                 }
@@ -249,181 +252,16 @@ void Joueur::animer()
                 {
                     if(frame != 1)
                     {
-                        m_sprite.setTextureRect(sf::IntRect(0,0,m_tailleTexture.x /4 , m_tailleTexture.y /4));
+                        m_sprite.setTextureRect(sf::IntRect(0,(m_direction-1) * m_tailleTexture.y/4 ,m_tailleTexture.x /4 , m_tailleTexture.y /4));
                         frame = 1;
                     }
                     setPositionspr();
                     m_enDeplacement=false;
                 }
-
-
-            }
-
-            if(m_direction ==2)
-            {
-
-
-                if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 )
-                {
-                    if(frame != 1)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(0,     m_tailleTexture.y/4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 1;
-                    }
-                }
-
-                else if(m_tempsAnimation.asMilliseconds()>= TEMPSANIMATION / 4 && m_tempsAnimation.asMilliseconds()<  (2 * TEMPSANIMATION )/ 4 )
-                {
-                    if(frame != 2)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(m_tailleTexture.x / 4,    m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 2;
-                    }
-                }
-
-                else if(m_tempsAnimation.asMilliseconds()>= (2 * TEMPSANIMATION ) / 4  && m_tempsAnimation.asMilliseconds()<  (3 * TEMPSANIMATION )/ 4 )
-                {
-                    if(frame != 3)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(2*m_tailleTexture.x/4,    m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 3;
-                    }
-                }
-
-                else if(m_tempsAnimation.asMilliseconds()>=(3 * TEMPSANIMATION )/ 4 && m_tempsAnimation.asMilliseconds() <  (TEMPSANIMATION) )
-                {
-                    if(frame != 4)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(3*m_tailleTexture.x/4, m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 4;
-                    }
-                }
-
-                else
-                {
-                    if(frame != 1)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(0,m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 1;
-                    }
-                    setPositionspr();
-                    m_enDeplacement=false;
-                }
-
-
-            }
-
-
-            if(m_direction ==3)
-            {
-
-
-                if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 )
-                {
-                    if(frame != 1)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(0,     2*m_tailleTexture.y/4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 1;
-                    }
-                }
-
-                else if(m_tempsAnimation.asMilliseconds()>= TEMPSANIMATION / 4 && m_tempsAnimation.asMilliseconds()<  (2 * TEMPSANIMATION )/ 4 )
-                {
-                    if(frame != 2)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(m_tailleTexture.x / 4,    2*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 2;
-                    }
-                }
-
-                else if(m_tempsAnimation.asMilliseconds()>= (2 * TEMPSANIMATION ) / 4  && m_tempsAnimation.asMilliseconds()<  (3 * TEMPSANIMATION )/ 4 )
-                {
-                    if(frame != 3)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(2*m_tailleTexture.x/4,    2*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 3;
-                    }
-                }
-
-                else if(m_tempsAnimation.asMilliseconds()>=(3 * TEMPSANIMATION )/ 4 && m_tempsAnimation.asMilliseconds() <  (TEMPSANIMATION) )
-                {
-                    if(frame != 4)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(3*m_tailleTexture.x/4, 2*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 4;
-                    }
-                }
-
-                else
-                {
-                    if(frame != 1)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(0, 2*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 1;
-                    }
-                    setPositionspr();
-                    m_enDeplacement=false;
-                }
-
-
-            }
-
-            if(m_direction ==4)
-            {
-
-
-                if( m_tempsAnimation.asMilliseconds() >=0  && m_tempsAnimation.asMilliseconds()< TEMPSANIMATION / 4 )
-                {
-                    if(frame != 1)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(0,     3*m_tailleTexture.y/4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 1;
-                    }
-                }
-
-                else if(m_tempsAnimation.asMilliseconds()>= TEMPSANIMATION / 4 && m_tempsAnimation.asMilliseconds()<  (2 * TEMPSANIMATION )/ 4 )
-                {
-                    if(frame != 2)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(m_tailleTexture.x / 4,    3*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 2;
-                    }
-                }
-
-                else if(m_tempsAnimation.asMilliseconds()>= (2 * TEMPSANIMATION ) / 4  && m_tempsAnimation.asMilliseconds()<  (3 * TEMPSANIMATION )/ 4 )
-                {
-                    if(frame != 3)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(2*m_tailleTexture.x/4,    3*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 3;
-                    }
-                }
-
-                else if(m_tempsAnimation.asMilliseconds()>=(3 * TEMPSANIMATION )/ 4 && m_tempsAnimation.asMilliseconds() <  (TEMPSANIMATION) )
-                {
-                    if(frame != 4)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(3*m_tailleTexture.x/4, 3*m_tailleTexture.y /4,m_tailleTexture.x /4 , m_tailleTexture.y /4));
-                        frame = 4;
-                    }
-                }
-
-                else
-                {
-                    if(frame != 1)
-                    {
-                        m_sprite.setTextureRect(sf::IntRect(0, 3*m_tailleTexture.y /4,m_tailleTexture.x/4 , m_tailleTexture.y /4));
-                        frame = 1;
-                    }
-                    setPositionspr();
-                    m_enDeplacement=false;
-                }
-
-            }
 
         }
-
     }
+
 }
 
 void Joueur::setPositionspr()

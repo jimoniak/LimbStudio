@@ -1,0 +1,8 @@
+Lisez moi Limbescape
+
+
+*Controle:
+
+ZQSD   Haut, Gauche, Bas , Droite
+
+touches directionnelles pour déplacer la vue

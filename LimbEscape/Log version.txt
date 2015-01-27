@@ -1,3 +1,14 @@
+*alpha 0.9:
+Ajout Crédit
+Ajout bord de carte
+Ajout fonctionnalités pour transparence
+Modification police de base
+Ajout son/musique menu Ok!
+Amelioration chronometre 
+Affichage joueur corrigé 
+Amelioration graphique (reste sprite joueur à créer)
+
+
 *alpha 0.8: 
 
 corrections: ajout sécurité RessourceHolder 
@@ -5,12 +16,14 @@ Ajout de fonction restart en jeu (recharger la carte pour retenter le puzzle)
 Ajout d'un systeme de liaison de niveau 
 Ajout d'un chronometre.
 Ajout des Packs ressources fonctionnels. 
+Ajout des menus vignettes.
+Correction de bugs...
 
 
 *alpha .7:
 Ajout d'une fonction victoire qui fait revenir au menu principal 
 Ajout d'un bouton retour en jeu 
-éecriture du systeme de collision pour corriger des bugs 
+Réecriture du systeme de collision pour corriger des bugs 
 *Correction de bug d'affichage (caisse affiché sur la bonne couche) 
 
 

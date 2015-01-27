@@ -32,7 +32,7 @@ depot officiel : https://github.com/jimoniak/LimbEscape
 #define NOMBRE_FRAME 4
 
 #define OFFSET_CARTE  0- (COTECARTE * LARGEUR_TILE) / 2
-#define VERSION "Version alpha 0.8"
+#define VERSION "Version alpha 0.9"
 
 
 
